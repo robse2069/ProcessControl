@@ -1,0 +1,10 @@
+Process Control CAN Sensor Node
+
+Short: CSN
+
+Sensor Node will measure informations and send them to the CAN network.
+
+Folders:
+  Configurator: Python Script to configure each CSN according to config.xml from GUI
+  Hardware: Schematic, Layout, Calculations
+  
