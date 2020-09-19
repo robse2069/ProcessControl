@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<characteristics>
+    <control name="GOx pre"
+            setValue="0"
+            value="0"
+            minValue="0"
+            maxValue="1"
+            unit="none"
+            MsgID="1234"
+            type="button">
+    </control>
+    <control name="GOx Main"
+            setValue="0"
+            value="0"
+            minValue="0"
+            maxValue="1"
+            unit="none"
+            MsgID="1234"
+            type="button">
+    </control>
+    <control name="Ethanol pre"
+            setValue="0"
+            value="0"
+            minValue="0"
+            maxValue="1"
+            unit="none"
+            MsgID="1234"
+            type="button">
+    </control>
+
+    <control name="Ethanol Main"
+            setValue="0"
+            value="0"
+            minValue="0"
+            maxValue="1"
+            unit="none"
+            MsgID="42"
+            type="button">
+    </control>
+
+    <measurement name="Voltage"
+            value="0"
+            minValue="0"
+            maxValue="220"
+            unit="Volt"
+            MsgID="1235">
+    </measurement>
+    <communication method="loopback"
+        ></communication>
+    <GUIUpdate name="Updaterate" unit="ms">
+        500
+    </GUIUpdate>
+    <logging name="cycletime"
+            value="100"
+             unit="ms">
+    </logging>
+
+</characteristics>
+
+
+
+
+
+
+
+
+
+    <!--
+    <control>
+        <name></name>
+        <value></value>
+        <minValue></minValue>
+        <maxValue></maxValue>
+        <unit></unit>
+        <MsgID></MsgID>
+        <type></type>       #can be: button, slider, number, string
+    </control>
+
+    measurement:
+        self.value=value
+        self.min=minValue
+        self.max=maxValue
+        self.unit = unit
+        self.ID=MsgID
+
+    -->
