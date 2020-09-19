@@ -1,0 +1,7 @@
+Process Control GUI
+Used to control and read nodes in the network
+
+Process_Control_Main.py will create inputs and readings according to config.xml
+Messages on CAN bus will be interpredet by informatino in config.xml
+
+GUI will also log all Signals
