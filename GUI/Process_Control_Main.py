@@ -9,7 +9,6 @@ import control as controlhandler
 import measurement as meashandler
 import myLogging
 import sys
-import antigravity
 
 import queue
 
