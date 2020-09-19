@@ -1,0 +1,10 @@
+Process Control CAN Actor Node
+
+Short: C2AN
+
+As of 09/2020, C2AN and CSN will have the same Software using different configurations
+
+Actors to be controlled:
+- Direct PWM output
+  Heaters, valves, Lamps, Relais, etc.
+- RC-Servos
