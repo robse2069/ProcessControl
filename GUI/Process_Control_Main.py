@@ -4,15 +4,18 @@ import threading
 import logging
 import xml.etree.ElementTree as ET
 import PC_Comms
+import UART_Comms
 import control as controlhandler
 import measurement as meashandler
 import myLogging
 import sys
 
+import queue
+
 
 class myGUIClass:
-    def __init__(self):
-        self.window = tk.Tk()
+    def __init__(self, master):
+        self.window = master
         self.GUIControls=[]
         self.GUIControlsReadback=[]
         self.GUIMeasurementsLabels=[]
@@ -71,8 +74,7 @@ class myGUIClass:
         #start updater for all displayed values
         self.update()
         self.callLogging()
-        self.CANScheduler
-        self.window.mainloop()
+        #self.CANScheduler
 
     def toggleLogging(self):
         filename=self.ent_filename.get()
@@ -107,16 +109,6 @@ class myGUIClass:
         self.window.after(logginghandler.cycleTime,self.callLogging)
         logginghandler.loggingTask()
 
-
-
-    def CANScheduler(self):
-        for control in config.Controls:
-            pcComms.send(control.ID,control.setValue)
-
-        recvBuffer = pcComms.read()
-        for recv in recvBuffer:
-            pass
-        self.window.after(logginghandler.cycleTime/2, self.CANScheduler)
 
 
 class configManager:
@@ -165,13 +157,74 @@ class configManager:
             tempLogging['objList'].append(object)
         self.logging=tempLogging
 
+class ThreadedClient:
+    def __init__(self,master):
+        self.master=master
 
+        # Create the queue
+        self.queue = queue.Queue()
+
+        # Set up the GUI part
+        self.gui = myGUIClass(master)
+
+        # Set up the thread to do asynchronous I/O
+        # More can be made if necessary
+        self.thread1 = threading.Thread(target=self.workerThread1)
+        self.thread1.start()
+
+        # Start the periodic call in the GUI to check if the queue contains
+        # anything
+        self.CANScheduler()
+
+
+
+
+#        self.window.mainloop()
+
+
+
+    def CANScheduler(self):
+        # function is polling the can recv queue, decodes information and updates measurements
+        # control updates are also send out regularly
+
+        for control in config.Controls:
+            pcComms.send(control.ID,control.setValue)
+
+        while self.queue.qsize():
+            try:
+                msg = self.queue.get(0)
+                # Check contents of message and do what it says
+                # As a test, we simply print it
+                config.Measurements[0].value=msg
+            except queue.Empty:
+                pass
+
+        self.master.after(logginghandler.cycleTime, self.CANScheduler)
+
+    def workerThread1(self):
+        """
+        This is where we handle the asynchronous I/O. For example, it may be
+        a 'select()'.
+        One important thing to remember is that the thread has to yield
+        control.
+        """
+        while True:
+            time.sleep(0.1)
+            msg = 42
+            self.queue.put(msg)
+
+root=tk.Tk()
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
 
 
 config = configManager()
-#pcComms = PC_Comms.PC_Comms(config.commsMethod)
+#pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements)
+pcComms = UART_Comms.UART_Comms(config.Controls,config.Measurements)
 
 logginghandler=myLogging.myLogging(config.logging)
-myGUIClass()
+
+client=ThreadedClient(root)
+root.mainloop()
+
+logginghandler.stopLogging()
