@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLSequenceAllInOne</id>
+    <coordinates>
+      <x>0</x>
+      <y>0</y>
+      <w>1770</w>
+      <h>1150</h>
+    </coordinates>
+    <panel_attributes>title=Sequences inside Python GUI and Surroundings
+autoTick=false
+obj=GUI update~gui 
+obj=CAN Scheduler~can
+obj=CAN Send~canS
+obj=CAN Read~canR
+obj=Worker Thread~worker
+obj=queue~Q
+gate-&gt;gui :Start Programm
+
+on=gui
+tick=
+tick=
+gate-&gt;worker
+on=worker
+gate-&gt; can: start running
+on=can
+tick=
+can-&gt;canS: MSG
+tick=
+off=gui
+tick=
+can-&gt;Q: msg?
+tick=
+Q-&gt;can:MSG
+tick=
+can-&gt;gui: values
+off=can
+tick=
+worker-&gt;canR: do read
+tick=
+canS-&gt;canR: MSG
+tick=
+canR-&gt;worker: MSG
+tick=
+worker-&gt;Q:Msg
+tick=
+tick=
+tick=
+tick=
+tick=
+tick=
+tick=
+on=can
+tick=
+off=can
+tick=
+tick=
+tick=
+tick=
+on=can
+tick=
+off=can
+tick=
+tick=
+tick=
+tick=
+on=can
+tick=
+off=can
+tick=
+tick=
+tick=
+tick=
+tick=</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

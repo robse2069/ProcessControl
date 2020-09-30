@@ -4,11 +4,11 @@ import threading
 import logging
 import xml.etree.ElementTree as ET
 import PC_Comms
-import UART_Comms
 import control as controlhandler
 import measurement as meashandler
 import myLogging
 import sys
+
 
 import queue
 
@@ -86,9 +86,9 @@ class myGUIClass:
         # update control readbacks
         for setValue in self.GUIControlsReadback:
             if config.Controls[iterator].unit != "none":
-                setValue["text"] = config.Controls[iterator].setValue + " " + config.Controls[iterator].unit
+                setValue["text"] = config.Controls[iterator].value + " " + config.Controls[iterator].unit
             else:
-                setValue["text"] = config.Controls[iterator].setValue
+                setValue["text"] = config.Controls[iterator].value
             iterator += 1
 
         #update measurements
@@ -192,14 +192,18 @@ class ThreadedClient:
 
         while self.queue.qsize():
             try:
-                msg = self.queue.get(0)
+                [ID,value] = self.queue.get(0)
                 # Check contents of message and do what it says
-                # As a test, we simply print it
-                config.Measurements[0].value=msg
-            except queue.Empty:
-                pass
+                for meas in config.Measurements:
+                    if meas.ID==ID:
+                        meas.value = value
+                for control in config.Controls:
+                    if control.ID==ID:
+                        control.value = value
 
-        self.master.after(logginghandler.cycleTime, self.CANScheduler)
+            except:
+                pass
+        self.master.after(config.GUIUpdate, self.CANScheduler)
 
     def workerThread1(self):
         """
@@ -208,10 +212,11 @@ class ThreadedClient:
         One important thing to remember is that the thread has to yield
         control.
         """
+
         while True:
-            time.sleep(0.1)
-            msg = 42
-            self.queue.put(msg)
+            newMSG = pcComms.read()
+            if newMSG != None:
+                self.queue.put(newMSG)
 
 root=tk.Tk()
 format = "%(asctime)s: %(message)s"
@@ -219,8 +224,8 @@ logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
 
 
 config = configManager()
-#pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements)
-pcComms = UART_Comms.UART_Comms(config.Controls,config.Measurements)
+pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements,type="loopback")
+#pcComms = UART_Comms.UART_Comms(config.Controls,config.Measurements)
 
 logginghandler=myLogging.myLogging(config.logging)
 
