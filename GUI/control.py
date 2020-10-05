@@ -1,4 +1,3 @@
-import PC_Comms
 
 class control:
     def __init__(self, name, setValue=0, value=0, minValue=0, maxValue=1, unit="", MsgID=10000, type="button"):

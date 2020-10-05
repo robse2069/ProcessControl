@@ -2,6 +2,7 @@ from csv import writer
 
 class myLogging:
     def __init__(self,config):
+        self.file=[]
         self.state="off"
         self.cycleTime=config['cycletime']
         self.doLogging=False
@@ -48,6 +49,9 @@ class myLogging:
 
     def stopLogging(self):
         self.state="stopping"
-        self.file.close()
+        try:
+            self.file.close()
+        except:
+            pass
         # at end of function
         self.state="inactive"
