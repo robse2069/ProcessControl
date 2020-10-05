@@ -4,7 +4,7 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>847</x>
+      <x>826</x>
       <y>140</y>
       <w>140</w>
       <h>126</h>
@@ -18,7 +18,7 @@ recvBuffer</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>21</x>
+      <x>0</x>
       <y>126</y>
       <w>476</w>
       <h>490</h>
@@ -33,7 +33,8 @@ constants
 - uint16_t valueOffset
 - uint16_t valueMultiplier_m
 - uint8_t CANID
-- char[10] unit
+- char[8] unit
+- char[8] name
 - uint16_t updaterate_ms
 - nodeType_t nodeType
 
@@ -50,7 +51,7 @@ globals
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>847</x>
+      <x>826</x>
       <y>483</y>
       <w>140</w>
       <h>98</h>
@@ -63,20 +64,19 @@ SensorManager
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>126</x>
+      <x>105</x>
       <y>42</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
     <panel_attributes>symbol=component
-Scheduler
-(FreeRTOS)</panel_attributes>
+Scheduler: TimeSlice</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>420</x>
+      <x>399</x>
       <y>455</y>
       <w>70</w>
       <h>84</h>
@@ -88,7 +88,7 @@ Set</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>427</y>
       <w>378</w>
       <h>105</h>
@@ -103,7 +103,7 @@ valueMultiplier_m</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>420</x>
+      <x>399</x>
       <y>217</y>
       <w>70</w>
       <h>231</h>
@@ -115,7 +115,7 @@ Get</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>511</y>
       <w>378</w>
       <h>63</h>
@@ -128,7 +128,7 @@ valuePrev</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>217</y>
       <w>378</w>
       <h>42</h>
@@ -142,7 +142,7 @@ update Frequency
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>847</x>
+      <x>826</x>
       <y>0</y>
       <w>140</w>
       <h>70</h>
@@ -154,12 +154,12 @@ SetupHandler</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>903</x>
+      <x>882</x>
       <y>63</y>
       <w>98</w>
       <h>91</h>
     </coordinates>
-    <panel_attributes>lt=[&lt;]-[&gt;]
+    <panel_attributes>lt=[^]-[^]
 setup messages
 </panel_attributes>
     <additional_attributes>10.0;110.0;10.0;10.0</additional_attributes>
@@ -167,35 +167,74 @@ setup messages
   <element>
     <id>UMLSequenceAllInOne</id>
     <coordinates>
-      <x>21</x>
+      <x>0</x>
       <y>658</y>
-      <w>917</w>
-      <h>217</h>
+      <w>1323</w>
+      <h>756</h>
     </coordinates>
     <panel_attributes>title=CSN Startup 
 desc=Normal Startup\nboot, check, measure
 autoTick=false
+obj=Scheduler~sched
 obj=StateHandler~stateh
 obj=DataManager~data
-obj=Flash~flash 
-obj=Sensordriver~sensordriver
-obj=CAN~can
+obj=SensorManager~sensor
+obj=AktorManager~actor
+obj=SetupHandler~setup
 obj=CANHandler~canh
+obj=CAN Bus~can
 
+gate-&gt; sched:system startup
+gate -&gt; stateh: State=init
 tick=
-gate-&gt;stateh :event: Power on
-stateh-&gt;stateh +: State = init
-flash-&gt;data+: init: config parameters
+sched-&gt;setup: check parameters OK
 tick=
-data-&gt;canh+: init: config parameters
-data-&gt;sensordriver+: init: config parameters
-</panel_attributes>
+setup -&gt; stateh: If parameter NOK: state= error
+tick=
+sched -&gt; sensor: check values against min/max
+tick=
+sensor -&gt; stateh: If NOK: State = error
+tick=
+tick=
+tick=
+tick=
+stateh -&gt; stateh+: State = running
+tick=
+tick=
+sched -&gt; sensor: measure
+tick=
+sensor -&gt; data: get
+tick=
+data -&gt; sensor: parameter
+sensor -&gt; sensor +:measure
+tick=
+sensor -&gt; sched: done
+tick=
+sched -&gt; canh: do comms
+tick=
+canh-&gt; data: get
+tick=
+data-&gt;canh: parameter &amp; values
+canh -&gt; canh+: check comms &amp; send value
+tick=
+canh -&gt; data: valueSet
+tick=
+canh -&gt; sched: done
+tick=
+sched -&gt; actor: do action
+tick=
+actor -&gt; data: get
+tick=
+data -&gt; actor: Parameter &amp; valueSet
+actor-&gt;actor+:set output
+tick=
+actor-&gt;sched: done</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1057</x>
+      <x>1036</x>
       <y>315</y>
       <w>140</w>
       <h>70</h>
@@ -207,7 +246,7 @@ Timing-Driver</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1057</x>
+      <x>1036</x>
       <y>392</y>
       <w>140</w>
       <h>70</h>
@@ -219,7 +258,7 @@ ADC-Driver</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>980</x>
+      <x>959</x>
       <y>161</y>
       <w>91</w>
       <h>28</h>
@@ -231,7 +270,7 @@ Last Msg</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>847</x>
+      <x>826</x>
       <y>343</y>
       <w>140</w>
       <h>98</h>
@@ -244,7 +283,7 @@ AktorManager
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>245</y>
       <w>378</w>
       <h>259</h>
@@ -257,7 +296,7 @@ valueSet</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>420</x>
+      <x>399</x>
       <y>154</y>
       <w>70</w>
       <h>56</h>
@@ -269,7 +308,7 @@ SetConstants</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>49</y>
       <w>378</w>
       <h>154</h>
@@ -286,7 +325,7 @@ nodeType</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>371</x>
+      <x>350</x>
       <y>0</y>
       <w>140</w>
       <h>91</h>
@@ -304,7 +343,7 @@ Error</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>504</x>
+      <x>483</x>
       <y>35</y>
       <w>392</w>
       <h>168</h>
@@ -317,7 +356,7 @@ Event: Reset</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>504</x>
+      <x>483</x>
       <y>7</y>
       <w>357</w>
       <h>28</h>
@@ -329,7 +368,7 @@ Event: Setup complete</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>504</x>
+      <x>483</x>
       <y>56</y>
       <w>357</w>
       <h>329</h>
@@ -342,7 +381,7 @@ Event: Unlock</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>504</x>
+      <x>483</x>
       <y>77</y>
       <w>357</w>
       <h>147</h>
@@ -354,7 +393,7 @@ State</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
+      <x>462</x>
       <y>399</y>
       <w>378</w>
       <h>91</h>
@@ -372,7 +411,7 @@ valueMax</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1057</x>
+      <x>1036</x>
       <y>154</y>
       <w>140</w>
       <h>42</h>
@@ -380,6 +419,75 @@ valueMax</panel_attributes>
     <panel_attributes>symbol=component
 CAN ISR
 </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSequenceAllInOne</id>
+    <coordinates>
+      <x>0</x>
+      <y>1442</y>
+      <w>854</w>
+      <h>938</h>
+    </coordinates>
+    <panel_attributes>title=Setup
+desc=Setup Node with initial or new parameters
+autoTick=false
+obj=StateHandler~stateh
+obj=DataManager~data
+obj=SetupHandler~setup
+obj=CANHandler~canh
+obj=CAN Bus~can
+
+can-&gt;canh: request Setup
+tick=
+canh-&gt;stateh: request update
+tick=
+stateh-&gt;stateh+: state==\nerror\n|running\n|update\n-&gt;state=\nupdate\nelse: ignore
+tick=
+stateh-&gt;canh: state=update
+tick=
+can-&gt;canh:setupmsg1
+tick=
+canh-&gt;setup:setupmsg1
+tick=
+can-&gt;canh:setupmsg2
+tick=
+canh-&gt;setup:setupmsg2
+tick=
+can-&gt;canh:setupmsg3
+tick=
+canh-&gt;setup:setupmsg3
+tick=
+can-&gt;canh:setupmsg4
+tick=
+canh-&gt;setup:setupmsg4
+tick=
+tick=
+can-&gt;canh:terminate setup
+tick=
+canh-&gt;setup:terminate setup
+setup -&gt; setup+:check params, set error
+tick=
+setup -&gt; data: set const(parameter(s))
+tick=
+setup-&gt;canh: setupmsg1
+tick=
+canh-&gt;can: setupmsg1
+tick=
+setup-&gt;canh: setupmsg2
+tick=
+canh-&gt;can: setupmsg2
+tick=
+setup-&gt;canh: setupmsg3
+tick=
+canh-&gt;can: setupmsg3
+tick=
+setup-&gt;canh: setupmsg4
+tick=
+canh-&gt;can: setupmsg4
+tick=
+setup-&gt;stateh: update done
+stateh-&gt;stateh+: state-&gt;\nrunning</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
