@@ -4,13 +4,13 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>826</x>
-      <y>140</y>
+      <x>882</x>
+      <y>210</y>
       <w>140</w>
       <h>126</h>
     </coordinates>
     <panel_attributes>symbol=component
-CAN Driver
+CAN Handler
 -
 recvBuffer</panel_attributes>
     <additional_attributes/>
@@ -18,28 +18,29 @@ recvBuffer</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>0</x>
-      <y>126</y>
+      <x>56</x>
+      <y>196</y>
       <w>476</w>
       <h>490</h>
     </coordinates>
     <panel_attributes>symbol=component
-DataManager
+DataHandler
 -
-constants
+Constants
 - uint16_t valueDefault
 - uint16_t valueMax
 - uint16_t valueMin
 - uint16_t valueOffset
 - uint16_t valueMultiplier_m
-- uint8_t CANID
+- uint8_t CanID
 - char[8] unit
 - char[8] name
 - uint16_t updaterate_ms
 - nodeType_t nodeType
+- uint8_t last Errorcode
 
 -
-globals
+Runtime Data
 - uint16_t value
 - uint16_t valueSet
 - uint16_t valuePrev
@@ -51,21 +52,21 @@ globals
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>826</x>
-      <y>483</y>
+      <x>882</x>
+      <y>553</y>
       <w>140</w>
       <h>98</h>
     </coordinates>
     <panel_attributes>symbol=component
-SensorManager
+SensorHandler
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>105</x>
-      <y>42</y>
+      <x>70</x>
+      <y>105</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
@@ -76,20 +77,20 @@ Scheduler: TimeSlice</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>399</x>
-      <y>455</y>
-      <w>70</w>
+      <x>217</x>
+      <y>280</y>
+      <w>231</w>
       <h>84</h>
     </coordinates>
     <panel_attributes>symbol=component
-Set</panel_attributes>
+void StoreConstants(void)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>427</y>
+      <x>518</x>
+      <y>497</y>
       <w>378</w>
       <h>105</h>
     </coordinates>
@@ -101,35 +102,23 @@ valueMultiplier_m</panel_attributes>
     <additional_attributes>10.0;10.0;110.0;10.0;110.0;130.0;520.0;130.0</additional_attributes>
   </element>
   <element>
-    <id>UMLGeneric</id>
-    <coordinates>
-      <x>399</x>
-      <y>217</y>
-      <w>70</w>
-      <h>231</h>
-    </coordinates>
-    <panel_attributes>symbol=component
-Get</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>511</y>
-      <w>378</w>
-      <h>63</h>
+      <x>525</x>
+      <y>616</y>
+      <w>371</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>lt=[&lt;]-[&lt;]
 value
 valuePrev</panel_attributes>
-    <additional_attributes>10.0;10.0;50.0;10.0;50.0;70.0;520.0;70.0</additional_attributes>
+    <additional_attributes>10.0;20.0;510.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>217</y>
+      <x>518</x>
+      <y>287</y>
       <w>378</w>
       <h>42</h>
     </coordinates>
@@ -142,8 +131,8 @@ update Frequency
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>826</x>
-      <y>0</y>
+      <x>882</x>
+      <y>70</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
@@ -154,8 +143,8 @@ SetupHandler</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>882</x>
-      <y>63</y>
+      <x>938</x>
+      <y>133</y>
       <w>98</w>
       <h>91</h>
     </coordinates>
@@ -167,19 +156,19 @@ setup messages
   <element>
     <id>UMLSequenceAllInOne</id>
     <coordinates>
-      <x>0</x>
-      <y>658</y>
+      <x>77</x>
+      <y>1015</y>
       <w>1323</w>
-      <h>756</h>
+      <h>728</h>
     </coordinates>
     <panel_attributes>title=CSN Startup 
 desc=Normal Startup\nboot, check, measure
 autoTick=false
 obj=Scheduler~sched
 obj=StateHandler~stateh
-obj=DataManager~data
-obj=SensorManager~sensor
-obj=AktorManager~actor
+obj=DataHandler~data
+obj=SensorHandler~sensor
+obj=AktorHandler~actor
 obj=SetupHandler~setup
 obj=CANHandler~canh
 obj=CAN Bus~can
@@ -189,14 +178,13 @@ gate -&gt; stateh: State=init
 tick=
 sched-&gt;setup: check parameters OK
 tick=
-setup -&gt; stateh: If parameter NOK: state= error
+setup -&gt; sched: If parameter NOK: state= error
 tick=
 sched -&gt; sensor: check values against min/max
 tick=
-sensor -&gt; stateh: If NOK: State = error
+sensor -&gt; sched: If NOK: State = error
 tick=
-tick=
-tick=
+sched -&gt;  stateh: Init OK or Error
 tick=
 stateh -&gt; stateh+: State = running
 tick=
@@ -234,8 +222,8 @@ actor-&gt;sched: done</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1036</x>
-      <y>315</y>
+      <x>1092</x>
+      <y>385</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
@@ -246,8 +234,8 @@ Timing-Driver</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1036</x>
-      <y>392</y>
+      <x>1092</x>
+      <y>462</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
@@ -258,8 +246,8 @@ ADC-Driver</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>959</x>
-      <y>161</y>
+      <x>1015</x>
+      <y>231</y>
       <w>91</w>
       <h>28</h>
     </coordinates>
@@ -270,46 +258,34 @@ Last Msg</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>826</x>
-      <y>343</y>
+      <x>882</x>
+      <y>413</y>
       <w>140</w>
       <h>98</h>
     </coordinates>
     <panel_attributes>symbol=component
-AktorManager
+ActorHandler
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>245</y>
-      <w>378</w>
+      <x>525</x>
+      <y>315</y>
+      <w>371</w>
       <h>259</h>
     </coordinates>
     <panel_attributes>lt=[&lt;]-[&lt;]
 timeLastupdate_ms
 valueSet</panel_attributes>
-    <additional_attributes>10.0;350.0;50.0;350.0;50.0;10.0;520.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLGeneric</id>
-    <coordinates>
-      <x>399</x>
-      <y>154</y>
-      <w>70</w>
-      <h>56</h>
-    </coordinates>
-    <panel_attributes>symbol=component
-SetConstants</panel_attributes>
-    <additional_attributes/>
+    <additional_attributes>10.0;350.0;40.0;350.0;40.0;10.0;510.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>49</y>
+      <x>518</x>
+      <y>119</y>
       <w>378</w>
       <h>154</h>
     </coordinates>
@@ -325,8 +301,8 @@ nodeType</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>350</x>
-      <y>0</y>
+      <x>406</x>
+      <y>70</y>
       <w>140</w>
       <h>91</h>
     </coordinates>
@@ -334,7 +310,7 @@ nodeType</panel_attributes>
 StateHandler
 -
 Init
-Update
+Setup
 Running
 Locked
 Error</panel_attributes>
@@ -343,8 +319,8 @@ Error</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
-      <y>35</y>
+      <x>539</x>
+      <y>105</y>
       <w>392</w>
       <h>168</h>
     </coordinates>
@@ -356,8 +332,8 @@ Event: Reset</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
-      <y>7</y>
+      <x>539</x>
+      <y>77</y>
       <w>357</w>
       <h>28</h>
     </coordinates>
@@ -368,21 +344,21 @@ Event: Setup complete</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
-      <y>56</y>
+      <x>539</x>
+      <y>126</y>
       <w>357</w>
       <h>329</h>
     </coordinates>
     <panel_attributes>lt=[&lt;]-[&lt;]
 Event: Lock
 Event: Unlock</panel_attributes>
-    <additional_attributes>10.0;10.0;60.0;10.0;60.0;300.0;460.0;300.0;460.0;450.0;490.0;450.0</additional_attributes>
+    <additional_attributes>10.0;10.0;60.0;10.0;60.0;350.0;460.0;350.0;460.0;450.0;490.0;450.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>483</x>
-      <y>77</y>
+      <x>539</x>
+      <y>147</y>
       <w>357</w>
       <h>147</h>
     </coordinates>
@@ -393,8 +369,8 @@ State</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>462</x>
-      <y>399</y>
+      <x>518</x>
+      <y>469</y>
       <w>378</w>
       <h>91</h>
     </coordinates>
@@ -411,8 +387,8 @@ valueMax</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1036</x>
-      <y>154</y>
+      <x>1092</x>
+      <y>224</y>
       <w>140</w>
       <h>42</h>
     </coordinates>
@@ -424,8 +400,8 @@ CAN ISR
   <element>
     <id>UMLSequenceAllInOne</id>
     <coordinates>
-      <x>0</x>
-      <y>1442</y>
+      <x>126</x>
+      <y>1799</y>
       <w>854</w>
       <h>938</h>
     </coordinates>
@@ -433,7 +409,7 @@ CAN ISR
 desc=Setup Node with initial or new parameters
 autoTick=false
 obj=StateHandler~stateh
-obj=DataManager~data
+obj=DataHandler~data
 obj=SetupHandler~setup
 obj=CANHandler~canh
 obj=CAN Bus~can
@@ -489,5 +465,60 @@ tick=
 setup-&gt;stateh: update done
 stateh-&gt;stateh+: state-&gt;\nrunning</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>210</x>
+      <y>721</y>
+      <w>322</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+Debugging interface
+-
+Debug.h
+DebugActive = 1|0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>413</x>
+      <y>777</y>
+      <w>112</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+void print(char* string,uart8_t len);</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>756</x>
+      <y>749</y>
+      <w>140</w>
+      <h>98</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+HAL_USART Driver
+-
+HAL_UART_Transmit()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>518</x>
+      <y>798</y>
+      <w>252</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>lt=[&gt;]-[&gt;]
+string
+len
+timeout = 100</panel_attributes>
+    <additional_attributes>10.0;20.0;340.0;20.0</additional_attributes>
   </element>
 </diagram>
