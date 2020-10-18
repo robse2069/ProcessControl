@@ -6,7 +6,7 @@
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
+  * USER CODE END. Other portions of this file, whether
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
@@ -51,13 +51,28 @@
 
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
-#define B1_EXTI_IRQn EXTI15_10_IRQn
-#define USART_TX_Pin GPIO_PIN_2
-#define USART_TX_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
-#define USART_RX_GPIO_Port GPIOA
+#define IN_A_Meas1_Pin GPIO_PIN_0
+#define IN_A_Meas1_GPIO_Port GPIOA
+#define IN_A_Meas2_Pin GPIO_PIN_1
+#define IN_A_Meas2_GPIO_Port GPIOA
+#define UART_Tx_Pin GPIO_PIN_2
+#define UART_Tx_GPIO_Port GPIOA
+#define UART_Rx_Pin GPIO_PIN_3
+#define UART_Rx_GPIO_Port GPIOA
+#define IN_A_HW_Version_Pin GPIO_PIN_4
+#define IN_A_HW_Version_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define OUT_D_Actor1_Pin GPIO_PIN_6
+#define OUT_D_Actor1_GPIO_Port GPIOA
+#define OUT_D_Green_N_Pin GPIO_PIN_14
+#define OUT_D_Green_N_GPIO_Port GPIOB
+#define OUT_D_Red_N_Pin GPIO_PIN_15
+#define OUT_D_Red_N_GPIO_Port GPIOB
+#define CAN_Rx_Pin GPIO_PIN_11
+#define CAN_Rx_GPIO_Port GPIOA
+#define CAN_Tx_Pin GPIO_PIN_12
+#define CAN_Tx_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
@@ -67,12 +82,21 @@
 
 /* ########################## Assert Selection ############################## */
 /**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
+  * @brief Uncomment the line below to expanse the "assert_param" macro in the
   *        HAL drivers code
   */
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+#define ERROR_ALL_FINE					0
+#define ERROR_VALUE_TOO_HIGH			1
+#define ERROR_VALUE_TOO_LOW				2
+#define ERROR_PARAM_HIGH_LOW			3
+#define ERROR_DEFAULT_TOO_HIGH			4
+#define ERROR_DEFAULT_TOO_LOW			5
+#define ERROR_VALUE_MULTIPLIER_ZERO		6
+#define ERROR_UPDATERATE				7
+#define ERROR_ILLEGAL_STATE_CHANCE		8
 
 /* USER CODE END Private defines */
 

@@ -37,7 +37,7 @@
 
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
@@ -48,7 +48,7 @@
 /* Exported functions ------------------------------------------------------- */
 
 void SysTick_Handler(void);
-void EXTI15_10_IRQHandler(void);
+void CAN1_RX1_IRQHandler(void);
 
 #ifdef __cplusplus
 }

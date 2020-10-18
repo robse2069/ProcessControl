@@ -6,7 +6,7 @@
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
+  * USER CODE END. Other portions of this file, whether
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
@@ -82,21 +82,24 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
   /* USER CODE END CAN1_MspInit 0 */
     /* CAN1 clock enable */
     __HAL_RCC_CAN1_CLK_ENABLE();
-  
-    /**CAN GPIO Configuration    
+
+    /**CAN GPIO Configuration
     PA11     ------> CAN_RX
-    PA12     ------> CAN_TX 
+    PA12     ------> CAN_TX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_11;
+    GPIO_InitStruct.Pin = CAN_Rx_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(CAN_Rx_GPIO_Port, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
+    GPIO_InitStruct.Pin = CAN_Tx_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(CAN_Tx_GPIO_Port, &GPIO_InitStruct);
 
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -113,18 +116,20 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
   /* USER CODE END CAN1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_CAN1_CLK_DISABLE();
-  
-    /**CAN GPIO Configuration    
-    PA11     ------> CAN_RX
-    PA12     ------> CAN_TX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
 
+    /**CAN GPIO Configuration
+    PA11     ------> CAN_RX
+    PA12     ------> CAN_TX
+    */
+    HAL_GPIO_DeInit(GPIOA, CAN_Rx_Pin|CAN_Tx_Pin);
+
+    /* CAN1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */
   }
-} 
+}
 
 /* USER CODE BEGIN 1 */
 
