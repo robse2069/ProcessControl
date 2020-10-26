@@ -5,7 +5,9 @@
  *      Author: robert
  */
 
+#include "SetupHandler.h"
 #include "Debug.h"
+
 
 void SendSetupMsgs() {
 

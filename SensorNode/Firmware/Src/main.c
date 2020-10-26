@@ -54,7 +54,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern Constants_t Constants;
+//extern Constants_t Constants;
 #if DebugActive == 1
 static uint8_t debugmessage[10];
 #endif
@@ -81,7 +81,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	if (DebugActive) {
-		print("Begin main");
+		print("Begin main\n",11);
 	}
 
   /* USER CODE END 1 */

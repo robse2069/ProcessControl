@@ -4,10 +4,11 @@
  *  Created on: Oct 6, 2020
  *      Author: robert
  */
+
 #include "StateHandler.h"
+#include "Debug.h"
 #include "DataHandler.h"
 #include "main.h"
-#include "Debug.h"
 
 extern Constants_t Constants;
 
@@ -21,32 +22,32 @@ void Statehandler(uint8_t event) {
 		if (SystemState == Init) {
 			SystemState = Running;
 			if (DebugActive)
-				print("Statechange: Init -> Running\n");
+				print("Statechange: Init -> Running\n",29);
 		}
 		break;
 	case SetLock:
 		if (SystemState == Running) {
 			SystemState = Locked;
 			if (DebugActive)
-				print("Statechange: Running -> Locked\n");
+				print("Statechange: Running -> Locked\n",31);
 		}
 		break;
 	case ReleaseLock:
 		if (SystemState == Locked) {
 			SystemState = Running;
 			if (DebugActive)
-				print("Statechange: Locked-> Running\n");
+				print("Statechange: Locked-> Running\n",30);
 		}
 		break;
 	case RequestSetup:
 		if (SystemState == Running) {
 			SystemState = Setup;
 			if (DebugActive)
-				print("Statechange: Running -> Setup\n");
+				print("Statechange: Running -> Setup\n",30);
 		} else if (SystemState == Error) {
 			SystemState = Setup;
 			if (DebugActive)
-				print("Statechange: Error -> Setup\n");
+				print("Statechange: Error -> Setup\n",28);
 		}
 		// If SystemState is Locked: Ths message is ignored
 		break;
@@ -54,13 +55,13 @@ void Statehandler(uint8_t event) {
 		if (SystemState == Setup) {
 			SystemState = Init;
 			if (DebugActive)
-				print("Statechange: Setup -> Init\n");
+				print("Statechange: Setup -> Init\n",27);
 		}
 		break;
-	case Error:
+	case ErrorOccured:
 		SystemState = Error;
 		if (DebugActive)
-			print("Statechange: Error was reported\n");
+			print("Statechange: Error was reported\n",28);
 		break;
 	default:
 		//default to error if none of the statechanges above are met
@@ -68,7 +69,7 @@ void Statehandler(uint8_t event) {
 		Constants.lastErrorcode = Illegal_State_Change_requested;
 		StoreConstants();
 		if (DebugActive)
-			print("Statechange: Illegal Statechange -> Error\n");
+			print("Statechange: Illegal Statechange -> Error\n",38);
 
 	}
 

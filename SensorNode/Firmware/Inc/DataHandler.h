@@ -8,6 +8,8 @@
 #ifndef DATAHANDLER_H_
 #define DATAHANDLER_H_
 
+#include "stdint.h"
+
 typedef enum{
 	SensorVoltage,
 	SensorVoltageDifferential,

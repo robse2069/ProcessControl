@@ -12,8 +12,9 @@ Constants_t Constants;
 RuntimeData_t RuntimeData;
 
 void StoreConstants(void) {
-	if (DebugActive) {
+#if DebugActive ==1
 		print("Storing Constants to Flash\n", 27);
 		print("Storing Constants to Flash is not yet implemented\n", 50);
-	}
+#endif
+
 }

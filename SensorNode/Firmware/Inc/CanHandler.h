@@ -58,5 +58,5 @@
 //	Errorcode defined in CAN_MSG_SETUP_MSG_4
 
 
-void CAN_HandleRecvMsg(uint32_t ID, uint8_t data);
+void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data);
 #endif /* CANHANDLER_H_ */

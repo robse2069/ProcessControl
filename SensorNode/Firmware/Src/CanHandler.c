@@ -8,12 +8,13 @@
 #include "CanHandler.h"
 #include "DataHandler.h"
 #include "StateHandler.h"
+#include "SetupHandler.h"
 
 extern Constants_t Constants;
 extern RuntimeData_t RuntimeData;
 extern SystemState_t SystemState;
 
-void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
+void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 
 	switch (ID) {
 	case CAN_MSG_EMERGENCY:
@@ -24,10 +25,10 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
 		if (((data[CANID_MSB] << 8) | data[CANID_LSB]) == Constants.CanID) {
 			// listen only if node is addressed by its CAN ID
 			if (data[CAN_NODECOMMAND] == CAN_REQUEST_SETUP) {
-				StateHandler(RequestSetup);
+				Statehandler(RequestSetup);
 			}
 			if (data[CAN_NODECOMMAND] == CAN_TERMINATE_SETUP) {
-				StateHandler(SetupComplete);
+				Statehandler(SetupComplete);
 			}
 		}
 		break;
@@ -35,7 +36,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
 		if (SystemState == Setup) {
 			//only react to setupmessages if node is switched to setup
 			// SetupMsg 1 contains the Name
-			for (uint8_t i; i < 8; i++) {
+			for (uint8_t i=0; i < 8; i++) {
 				Constants.name[i] = data[i];
 			}
 		}
@@ -44,7 +45,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
 		if (SystemState == Setup) {
 			//only react to setupmessages if node is switched to setup
 			// Message contains the Unit of the value
-			for (uint8_t i; i < 8; i++) {
+			for (uint8_t i=0; i < 8; i++) {
 				Constants.unit[i] = data[i];
 			}
 		}
@@ -71,7 +72,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
 		StoreConstants();
 		SendSetupMsgs();
 		break;
-	case Constants.CanID:
+	case 0x42:
 		// This is the ID that the Node was configured to.
 		RuntimeData.valueSet = (data[CAN_VALUESET_MSB] << 8) | data[CAN_VALUESET_LSB];
 		// if node is Sensor, this value is ignored
@@ -81,4 +82,5 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t data) {
 	}
 
 }
+
 
