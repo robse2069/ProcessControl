@@ -80,9 +80,9 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	if (DebugActive) {
+#if DebugActive ==1
 		print("Begin main\n",11);
-	}
+#endif
 
   /* USER CODE END 1 */
 
@@ -117,7 +117,7 @@ int main(void)
 	while (1) {
 
 #if DebugActive == 1
-		if (HAL_UART_Receive(&huart2, debugmessage, 10, 1) == 0x00U) {
+		if (HAL_UART_Receive(&huart2, debugmessage, 10, 1) == HAL_OK) {
 			DecodeDebugMessage (debugmessage);
 
 		}
