@@ -23,6 +23,9 @@
 #define CAN_NODECOMMAND			0
 #define CANID_MSB				1
 #define CANID_LSB				2
+#define CAN_REQUEST_SETUP		1
+#define CAN_TERMINATE_SETUP		2
+
 
 // Bytes in CAN_MSG_SETUP_MSG_3
 #define CAN_VALUEMIN_MSB		0
@@ -54,10 +57,6 @@
 #define CAN_STATE				6
 //	Errorcode defined in CAN_MSG_SETUP_MSG_4
 
-typedef struct{
-	uint16_t ID;
-	uint8_t data[8];
-}CANMessage_t;
 
-void CAN_HandleRecvMsg(CANMessage_t message);
+void CAN_HandleRecvMsg(uint32_t ID, uint8_t data);
 #endif /* CANHANDLER_H_ */

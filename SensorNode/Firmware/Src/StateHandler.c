@@ -11,9 +11,8 @@
 
 extern Constants_t Constants;
 
-enum {
-	Init, Setup, Running, Locked, Error,
-} SystemState;
+
+SystemState_t SystemState;
 
 void Statehandler(uint8_t event) {
 
@@ -49,6 +48,7 @@ void Statehandler(uint8_t event) {
 			if (DebugActive)
 				print("Statechange: Error -> Setup\n");
 		}
+		// If SystemState is Locked: Ths message is ignored
 		break;
 	case SetupComplete:
 		if (SystemState == Setup) {

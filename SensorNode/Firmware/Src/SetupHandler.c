@@ -5,4 +5,11 @@
  *      Author: robert
  */
 
+#include "Debug.h"
 
+void SendSetupMsgs() {
+
+	if (DebugActive) {
+		print("Sending Setup Messages back is not yet implemented\n", 51);
+	}
+}

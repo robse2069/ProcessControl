@@ -12,5 +12,6 @@
 
 
 void print(char* string, uint8_t len);
+void DecodeDebugMessage(uint8_t *debugmessage);
 
 #endif /* DEBUG_H_ */

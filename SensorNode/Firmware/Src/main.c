@@ -51,13 +51,13 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-extern Constants_t Constants;
-
-
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+extern Constants_t Constants;
+#if DebugActive == 1
+static uint8_t debugmessage[10];
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,8 +80,10 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	if(DebugActive)
+	if (DebugActive) {
 		print("Begin main");
+	}
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -112,14 +114,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1) {
+
+#if DebugActive == 1
+		if (HAL_UART_Receive(&huart2, debugmessage, 10, 1) == 0x00U) {
+			DecodeDebugMessage (debugmessage);
+
+		}
+#endif
+
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
 
-  }
+	}
   /* USER CODE END 3 */
 
 }
@@ -194,10 +203,9 @@ void SystemClock_Config(void)
 void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  while(1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -212,8 +220,8 @@ void _Error_Handler(char *file, int line)
 void assert_failed(uint8_t* file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	/* User can add his own implementation to report the file name and line number,
+	 tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

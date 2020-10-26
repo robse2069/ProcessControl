@@ -9,7 +9,14 @@
 #define DATAHANDLER_H_
 
 typedef enum{
-	SensorNode,ActorNode,
+	SensorVoltage,
+	SensorVoltageDifferential,
+	SensorFreqency,
+	SensorPulsewidth,
+	ActorOnOff=10,
+	ActorPWM,
+	ActorMotor,
+
 }nodeType_t;
 
 typedef enum{

@@ -8,18 +8,26 @@
 #ifndef STATEHANDLER_H_
 #define STATEHANDLER_H_
 
-#define InitComplete	0
-#define RequestSetup	1
-#define SetupComplete	2
-#define SetLock			3
-#define ReleaseLock		4
-#define ErrorOccured	5
 
 
 
+typedef enum {
+	Init, Setup, Running, Locked, Error,
+} SystemState_t;
+
+typedef enum{
+	InitComplete,
+	RequestSetup,
+	SetupComplete,
+	SetLock,
+	ReleaseLock,
+	ErrorOccured,
+
+}Events_t;
 
 
-void Statehandler(uint8_t event);
+
+void Statehandler(Events_t event);
 
 
 #endif /* STATEHANDLER_H_ */
