@@ -1,16 +1,18 @@
-CSN und Control Node configurator
+CSN and Control Node configurator
 
 Use cases
 
 Uc1: Configuration
 Pre:
-node connected via CAN
+Node connected via CAN
+Other nodes also connected via CAN
 Node blank or preconfigured
 GUI not started
 CAN Adapter connected
 
 Doing:
 Start gui
+Select Node
 Check current configuration parameters
 Enter new parameters
 Upload parameters
@@ -22,12 +24,14 @@ New parameters in node
 Uc2: Verification
 Pre:
 Node connected to pc via can
+Other nodes also connected via CAN
 GUI closed
 Node configured
 Sensor/aktor connected to node
 
 Doing:
 Open gui
+Select Node
 Check parameters
 Read current sensor value Or control Aktor
 
