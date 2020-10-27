@@ -37,7 +37,7 @@
 #define CAN_UPDATERATE_MSB		6
 #define CAN_UPDATERATE_LSB		7
 
-// Bytes in CAN_MSG_SETUP_MSG_3
+// Bytes in CAN_MSG_SETUP_MSG_4
 #define CAN_NODETYPE			0
 //CANID_MSB defined in CAN_MSG_SETUP_MSG_3
 //CANID_LSB defined in CAN_MSG_SETUP_MSG_3
@@ -57,6 +57,7 @@
 #define CAN_STATE				6
 //	Errorcode defined in CAN_MSG_SETUP_MSG_4
 
-
+void InitCANHandler(void);
 void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data);
+void CAN_PublishData(void);
 #endif /* CANHANDLER_H_ */

@@ -36,7 +36,11 @@
 #include "stm32f1xx_it.h"
 
 /* USER CODE BEGIN 0 */
+#include "Scheduler.h"
+#include "CanHandler.h"
+#include "StateHandler.h"
 
+extern SystemState_t SystemState;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -57,7 +61,9 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  if (SystemState != Init ){
+	  scheduler();
+  }
   /* USER CODE END SysTick_IRQn 1 */
 }
 

@@ -6,13 +6,23 @@
  */
 
 #include "CanHandler.h"
+#include "can.h"
 #include "DataHandler.h"
 #include "StateHandler.h"
 #include "SetupHandler.h"
+#include "Debug.h"
 
 extern Constants_t Constants;
 extern RuntimeData_t RuntimeData;
 extern SystemState_t SystemState;
+extern CAN_HandleTypeDef hcan;
+
+void InitCANHandler(void) {
+	if (HAL_CAN_Receive_IT(&hcan, CAN_FIFO0) != HAL_OK) {
+		Constants.lastErrorcode = CAN_Error;
+		Statehandler(ErrorOccured);
+	}
+}
 
 void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 
@@ -82,4 +92,30 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 	}
 
 }
+void CAN_PublishData(void) {
+#if DebugActive == 1
 
+	if (hcan.State == HAL_CAN_STATE_READY) {
+		hcan.pTxMsg->Data[CAN_VALUE_MSB] = RuntimeData.value >> 8;
+		hcan.pTxMsg->Data[CAN_VALUE_LSB] = RuntimeData.value & 0xff;
+		hcan.pTxMsg->Data[CAN_VALUESET_MSB] = RuntimeData.valueSet >> 8;
+		hcan.pTxMsg->Data[CAN_VALUESET_LSB] = RuntimeData.valueSet & 0xff;
+		hcan.pTxMsg->Data[CAN_VALUEDEFAULT_MSB] = Constants.valueDefault >> 8;
+		hcan.pTxMsg->Data[CAN_VALUEDEFAULT_LSB] = Constants.valueDefault & 0xff;
+		hcan.pTxMsg->Data[CAN_STATE] = SystemState;
+		hcan.pTxMsg->Data[CAN_ERRORCODE] = Constants.lastErrorcode;
+
+		hcan.pTxMsg->DLC = 8;
+		hcan.pTxMsg->ExtId = 0;
+		hcan.pTxMsg->IDE = 0;
+		hcan.pTxMsg->RTR = 0;
+		hcan.pTxMsg->StdId = Constants.CanID;
+
+		HAL_CAN_Transmit(&hcan, Constants.updaterate_ms / 10);
+	}
+
+#else
+	Constants.lastErrorcode=Not_Implemented;
+	Statehandler(ErrorOccured);
+#endif
+}

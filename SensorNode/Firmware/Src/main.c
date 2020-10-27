@@ -47,6 +47,8 @@
 
 /* USER CODE BEGIN Includes */
 #include "StateHandler.h"
+#include "CanHandler.h"
+#include "DataHandler.h"
 #include "Debug.h"
 /* USER CODE END Includes */
 
@@ -110,6 +112,9 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
+  InitDataHandler();
+  InitCANHandler();
+  Statehandler(InitComplete);
   /* USER CODE END 2 */
 
   /* Infinite loop */

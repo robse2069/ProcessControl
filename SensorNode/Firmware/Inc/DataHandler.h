@@ -23,6 +23,7 @@ typedef enum{
 
 typedef enum{
 	All_Fine,
+	Not_Implemented,
 	Value_too_high,
 	Value_too_low,
 	Parameter_error_high_low,
@@ -31,7 +32,7 @@ typedef enum{
 	Value_multiplier_equals_0,
 	Updaterate_out_of_bounds,
 	Illegal_State_Change_requested,
-
+	CAN_Error,
 }Errorcodes_t;
 
 typedef struct{
@@ -57,6 +58,8 @@ uint16_t valuePrev;
 uint32_t time_ms;
 uint32_t timeLastupdate_ms;
 }RuntimeData_t;
+
+void InitDataHandler(void);
 
 void StoreConstants(void);
 
