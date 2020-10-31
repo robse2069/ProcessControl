@@ -8,6 +8,7 @@
 #include "DataHandler.h"
 #include "Debug.h"
 #include "string.h"
+#include "StateHandler.h"
 
 Constants_t Constants;
 RuntimeData_t RuntimeData;

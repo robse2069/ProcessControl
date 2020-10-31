@@ -46,6 +46,7 @@ Runtime Data
 - uint16_t valuePrev
 - uint32_t time_ms
 - uint32_t timeLastupdate_ms
+- Flags_t flags
 </panel_attributes>
     <additional_attributes/>
   </element>

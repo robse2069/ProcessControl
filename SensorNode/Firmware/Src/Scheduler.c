@@ -18,10 +18,11 @@ RuntimeData.time_ms++;
 
 	if (RuntimeData.time_ms >= RuntimeData.timeLastupdate_ms + Constants.updaterate_ms){
 		RuntimeData.timeLastupdate_ms = RuntimeData.time_ms;
+		RuntimeData.flags.sendCAN=1;
 
-		CAN_PublishData();
 #if DebugActive == 1
 		RuntimeData.value++;
+		print("schedule\n",9 );
 #endif
 	}
 

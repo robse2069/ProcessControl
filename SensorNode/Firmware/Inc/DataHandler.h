@@ -36,6 +36,10 @@ typedef enum{
 }Errorcodes_t;
 
 typedef struct{
+	uint32_t sendCAN:1;
+}Flags_t;
+
+typedef struct{
 uint16_t valueDefault;
 uint16_t valueMax;
 uint16_t valueMin;
@@ -57,6 +61,7 @@ uint16_t valueSet;
 uint16_t valuePrev;
 uint32_t time_ms;
 uint32_t timeLastupdate_ms;
+Flags_t flags;
 }RuntimeData_t;
 
 void InitDataHandler(void);

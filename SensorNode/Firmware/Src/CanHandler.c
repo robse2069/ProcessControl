@@ -18,10 +18,10 @@ extern SystemState_t SystemState;
 extern CAN_HandleTypeDef hcan;
 
 void InitCANHandler(void) {
-	if (HAL_CAN_Receive_IT(&hcan, CAN_FIFO0) != HAL_OK) {
-		Constants.lastErrorcode = CAN_Error;
-		Statehandler(ErrorOccured);
-	}
+	/*if (HAL_CAN_Receive_IT(&hcan, CAN_FIFO0) != HAL_OK) {
+	 Constants.lastErrorcode = CAN_Error;
+	 Statehandler(ErrorOccured);
+	 }*/
 }
 
 void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
@@ -93,29 +93,30 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 
 }
 void CAN_PublishData(void) {
-#if DebugActive == 1
 
-	if (hcan.State == HAL_CAN_STATE_READY) {
-		hcan.pTxMsg->Data[CAN_VALUE_MSB] = RuntimeData.value >> 8;
-		hcan.pTxMsg->Data[CAN_VALUE_LSB] = RuntimeData.value & 0xff;
-		hcan.pTxMsg->Data[CAN_VALUESET_MSB] = RuntimeData.valueSet >> 8;
-		hcan.pTxMsg->Data[CAN_VALUESET_LSB] = RuntimeData.valueSet & 0xff;
-		hcan.pTxMsg->Data[CAN_VALUEDEFAULT_MSB] = Constants.valueDefault >> 8;
-		hcan.pTxMsg->Data[CAN_VALUEDEFAULT_LSB] = Constants.valueDefault & 0xff;
-		hcan.pTxMsg->Data[CAN_STATE] = SystemState;
-		hcan.pTxMsg->Data[CAN_ERRORCODE] = Constants.lastErrorcode;
+	volatile CanTxMsgTypeDef* myTxMsg;
 
-		hcan.pTxMsg->DLC = 8;
-		hcan.pTxMsg->ExtId = 0;
-		hcan.pTxMsg->IDE = 0;
-		hcan.pTxMsg->RTR = 0;
-		hcan.pTxMsg->StdId = Constants.CanID;
+	if (hcan.State != HAL_CAN_STATE_RESET && hcan.State != HAL_CAN_STATE_BUSY
+			&& hcan.State != HAL_CAN_STATE_BUSY_TX
+			&& hcan.State != HAL_CAN_STATE_BUSY_TX_RX0
+			&& hcan.State != HAL_CAN_STATE_ERROR) {
+		(*myTxMsg).Data[CAN_VALUE_MSB] = RuntimeData.value >> 8;
+		myTxMsg->Data[CAN_VALUE_LSB] = RuntimeData.value & 0xff;
 
+		myTxMsg->Data[CAN_VALUESET_MSB] = RuntimeData.valueSet >> 8;
+		myTxMsg->Data[CAN_VALUESET_LSB] = RuntimeData.valueSet & 0xff;
+		myTxMsg->Data[CAN_VALUEDEFAULT_MSB] = Constants.valueDefault >> 8;
+		myTxMsg->Data[CAN_VALUEDEFAULT_LSB] = Constants.valueDefault & 0xff;
+		myTxMsg->Data[CAN_STATE] = SystemState;
+		myTxMsg->Data[CAN_ERRORCODE] = Constants.lastErrorcode;
+
+		myTxMsg->DLC = 8;
+		myTxMsg->ExtId = 0;
+		myTxMsg->IDE = 0;
+		myTxMsg->RTR = 0;
+		myTxMsg->StdId = Constants.CanID;
+		hcan.pTxMsg = myTxMsg;
 		HAL_CAN_Transmit(&hcan, Constants.updaterate_ms / 10);
-	}
 
-#else
-	Constants.lastErrorcode=Not_Implemented;
-	Statehandler(ErrorOccured);
-#endif
+	}
 }

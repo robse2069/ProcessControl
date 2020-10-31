@@ -57,9 +57,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 //extern Constants_t Constants;
-#if DebugActive == 1
-static uint8_t debugmessage[10];
-#endif
+extern RuntimeData_t RuntimeData;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,9 +81,6 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-#if DebugActive ==1
-		print("Begin main\n",11);
-#endif
 
   /* USER CODE END 1 */
 
@@ -112,6 +108,9 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
+#if DebugActive == 1
+		print("Begin Init\n",11);
+#endif
   InitDataHandler();
   InitCANHandler();
   Statehandler(InitComplete);
@@ -120,14 +119,11 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-
-#if DebugActive == 1
-		if (HAL_UART_Receive(&huart2, debugmessage, 10, 1) == HAL_OK) {
-			DecodeDebugMessage (debugmessage);
-
-		}
-#endif
-
+		if(RuntimeData.flags.sendCAN==1){
+			CAN_PublishData();
+			RuntimeData.flags.sendCAN=0;
+		}else
+			RuntimeData.flags.sendCAN=2;
 
   /* USER CODE END WHILE */
 

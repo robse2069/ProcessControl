@@ -10,7 +10,8 @@
 #include "CanHandler.h"
 
 void print(uint8_t* string, uint8_t len){
-	HAL_UART_Transmit(&huart2,string,len,100);
+	if(HAL_UART_GetState(&huart2)==HAL_UART_STATE_READY)
+		HAL_UART_Transmit(&huart2,string,len,100);
 }
 
 void DecodeDebugMessage(uint8_t *debugmessage){
