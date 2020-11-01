@@ -13,7 +13,7 @@
 extern Constants_t Constants;
 extern RuntimeData_t RuntimeData;
 
-void scheduler(void){
+void myscheduler(void){
 RuntimeData.time_ms++;
 
 	if (RuntimeData.time_ms >= RuntimeData.timeLastupdate_ms + Constants.updaterate_ms){

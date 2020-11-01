@@ -11,7 +11,7 @@
 
 
 void InitScheduler(void);
-void scheduler(void);
+void myscheduler(void);
 
 
 #endif /* SCHEDULER_H_ */

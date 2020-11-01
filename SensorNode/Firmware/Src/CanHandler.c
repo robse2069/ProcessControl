@@ -94,29 +94,29 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 }
 void CAN_PublishData(void) {
 
-	volatile CanTxMsgTypeDef* myTxMsg;
+	print("CAN\n", 4);
 
-	if (hcan.State != HAL_CAN_STATE_RESET && hcan.State != HAL_CAN_STATE_BUSY
-			&& hcan.State != HAL_CAN_STATE_BUSY_TX
-			&& hcan.State != HAL_CAN_STATE_BUSY_TX_RX0
-			&& hcan.State != HAL_CAN_STATE_ERROR) {
-		(*myTxMsg).Data[CAN_VALUE_MSB] = RuntimeData.value >> 8;
-		myTxMsg->Data[CAN_VALUE_LSB] = RuntimeData.value & 0xff;
+	CAN_TxHeaderTypeDef myHeader;
+	uint8_t myData[8];
 
-		myTxMsg->Data[CAN_VALUESET_MSB] = RuntimeData.valueSet >> 8;
-		myTxMsg->Data[CAN_VALUESET_LSB] = RuntimeData.valueSet & 0xff;
-		myTxMsg->Data[CAN_VALUEDEFAULT_MSB] = Constants.valueDefault >> 8;
-		myTxMsg->Data[CAN_VALUEDEFAULT_LSB] = Constants.valueDefault & 0xff;
-		myTxMsg->Data[CAN_STATE] = SystemState;
-		myTxMsg->Data[CAN_ERRORCODE] = Constants.lastErrorcode;
+	myHeader.DLC = 8;
+	myHeader.ExtId = 0;
+	myHeader.IDE = CAN_ID_STD;
+	myHeader.RTR = CAN_RTR_DATA;
+	myHeader.StdId = Constants.CanID;
+	myHeader.TransmitGlobalTime = DISABLE;
 
-		myTxMsg->DLC = 8;
-		myTxMsg->ExtId = 0;
-		myTxMsg->IDE = 0;
-		myTxMsg->RTR = 0;
-		myTxMsg->StdId = Constants.CanID;
-		hcan.pTxMsg = myTxMsg;
-		HAL_CAN_Transmit(&hcan, Constants.updaterate_ms / 10);
+	myData[CAN_VALUE_MSB] = RuntimeData.value >> 8;
+	myData[CAN_VALUE_LSB] = RuntimeData.value & 0xff;
 
+	myData[CAN_VALUESET_MSB] = RuntimeData.valueSet >> 8;
+	myData[CAN_VALUESET_LSB] = RuntimeData.valueSet & 0xff;
+	myData[CAN_VALUEDEFAULT_MSB] = Constants.valueDefault >> 8;
+	myData[CAN_VALUEDEFAULT_LSB] = Constants.valueDefault & 0xff;
+	myData[CAN_STATE] = SystemState;
+	myData[CAN_ERRORCODE] = Constants.lastErrorcode;
+
+	if ((hcan.Instance->TSR & CAN_TSR_TME0) != 0U){
+		HAL_CAN_AddTxMessage(&hcan, &myHeader, myData, (uint32_t *)CAN_TX_MAILBOX0);
 	}
 }

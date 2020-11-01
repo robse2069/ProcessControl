@@ -37,6 +37,8 @@ typedef enum{
 
 typedef struct{
 	uint32_t sendCAN:1;
+	uint32_t myPin:1;		// indicates LED Status while debugging
+
 }Flags_t;
 
 typedef struct{
