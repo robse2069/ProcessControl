@@ -106,7 +106,7 @@ int main(void)
 	print("Begin Init\n", 11);
 #endif
 	InitDataHandler();
-	InitCANHandler();
+	InitCANHandler(&hcan);
 	Statehandler(InitComplete);
   /* USER CODE END 2 */
 
@@ -114,7 +114,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1) {
 		if (RuntimeData.flags.sendCAN == 1) {
-			CAN_PublishData();
+			CAN_PublishData(&hcan);
 			if (RuntimeData.flags.myPin == 0) {
 				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 				RuntimeData.flags.myPin=1;

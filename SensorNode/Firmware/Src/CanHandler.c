@@ -15,9 +15,8 @@
 extern Constants_t Constants;
 extern RuntimeData_t RuntimeData;
 extern SystemState_t SystemState;
-extern CAN_HandleTypeDef hcan;
 
-void InitCANHandler(void) {
+void InitCANHandler(CAN_HandleTypeDef *hcan) {
 	/*if (HAL_CAN_Receive_IT(&hcan, CAN_FIFO0) != HAL_OK) {
 	 Constants.lastErrorcode = CAN_Error;
 	 Statehandler(ErrorOccured);
@@ -92,7 +91,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 	}
 
 }
-void CAN_PublishData(void) {
+void CAN_PublishData(CAN_HandleTypeDef *hcan) {
 
 	print("CAN\n", 4);
 
@@ -116,7 +115,10 @@ void CAN_PublishData(void) {
 	myData[CAN_STATE] = SystemState;
 	myData[CAN_ERRORCODE] = Constants.lastErrorcode;
 
-	if ((hcan.Instance->TSR & CAN_TSR_TME0) != 0U){
-		HAL_CAN_AddTxMessage(&hcan, &myHeader, myData, (uint32_t *)CAN_TX_MAILBOX0);
+	uint32_t myMailbox;
+	myMailbox =CAN_TX_MAILBOX0;
+
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U){
+		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
 	}
 }

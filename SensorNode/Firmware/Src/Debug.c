@@ -17,7 +17,7 @@ void print(uint8_t* string, uint8_t len){
 void DecodeDebugMessage(uint8_t *debugmessage){
 	uint8_t data[8];
 	uint16_t ID = (debugmessage[0]<<8)|debugmessage[1];
-	for (uint8_t i;i<8;i++){
+	for (uint8_t i=0;i<8;i++){
 		data[i]=debugmessage[i+2];
 	}
 	CAN_HandleRecvMsg(ID,data);

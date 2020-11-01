@@ -57,7 +57,7 @@
 #define CAN_STATE				6
 //	Errorcode defined in CAN_MSG_SETUP_MSG_4
 
-void InitCANHandler(void);
+void InitCANHandler(CAN_HandleTypeDef *hcan);
 void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data);
-void CAN_PublishData(void);
+void CAN_PublishData(CAN_HandleTypeDef *hcan);
 #endif /* CANHANDLER_H_ */
