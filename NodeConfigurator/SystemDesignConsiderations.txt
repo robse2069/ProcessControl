@@ -34,6 +34,7 @@ Open gui
 Select Node
 Check parameters
 Read current sensor value Or control Aktor
+Verify CSN Value against external measuring device
 
 Done:
 Values / function verified or faults known
@@ -44,7 +45,7 @@ Running in Python
 CAN adapter shall be used
 Connection to can adapter shall be established automatically
 Reading of values shall be updated automatically
-Update of all values and parameters shall occur every 1000ms
+Update of all values and parameters shall occur every 500ms
 Reading and display of parameters shall be updated automatically
 Parameters shall be send via Button
 Parameters shall be entered as signed integers
@@ -53,13 +54,36 @@ Control shall be entered as signed integers
 
 Functions
 GUI-init: establish connection, initalize gui
-GUI-Update: read can Bus and update gui every 1000ms
+GUI-Update: read can Bus and update gui every 500ms
 Button-functions: according to Buttons
 
 Classes:
-GUI
-Config
-Signal (abstract)
-Measurement
-Control
-TBD
+GUI(tkinter)
+    __init__
+    buttonfunctions
+        SelectNode (after entering node-ID / CAN-ID; starts Setup mode in Node)
+            calls readNodeData
+        writeParameters
+        WriteControl
+        ConfigDone
+
+    updateValues
+
+NodeData
+    __init__
+        value_16U
+        valueSet_16U
+        valueDefault_16U
+        valueMax_16U
+        valueMin_16U
+        valueOffset_16U
+        valueMultiplier_m_16U
+        CanID_8U
+        unit_8x8U
+        name_8x8U
+        updaterate_ms_16U
+        nodeType
+        lastErrorcode
+
+    readNodeData
+    WriteNodeData
