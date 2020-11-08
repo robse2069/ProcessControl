@@ -8,7 +8,8 @@ import control as controlhandler
 import measurement as meashandler
 import myLogging
 import sys
-
+import can
+import struct
 
 import queue
 
@@ -123,7 +124,7 @@ class configManager:
         ListOfControls = root.findall('control')
         for iterator in ListOfControls:
             try:
-                self.Controls.append(controlhandler.control(iterator.attrib['name'],int(iterator.attrib['setValue']),int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],iterator.attrib['MsgID'],iterator.attrib['type']))
+                self.Controls.append(controlhandler.control(iterator.attrib['name'],int(iterator.attrib['setValue']),int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],int(iterator.attrib['MsgID']),iterator.attrib['type']))
             except:
                 sys.exit("Config import crashed. Check config.xml")
 
@@ -132,7 +133,7 @@ class configManager:
         ListOfMeasurements = root.findall('measurement')
         for iterator in ListOfMeasurements:
             try:
-                self.Measurements.append(meashandler.measurement(iterator.attrib['name'],int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],iterator.attrib['MsgID']))
+                self.Measurements.append(meashandler.measurement(iterator.attrib['name'],int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],int(iterator.attrib['MsgID'])))
             except:
                 sys.exit("Config import crashed. Check config.xml")
 
@@ -169,8 +170,9 @@ class ThreadedClient:
 
         # Set up the thread to do asynchronous I/O
         # More can be made if necessary
-        self.thread1 = threading.Thread(target=self.workerThread1)
-        self.thread1.start()
+        self.can0 = can.interface.Bus(channel='can0', bustype='socketcan_ctypes')
+        self.threadCAN = threading.Thread(target=self.workerThreadCAN)
+        self.threadCAN.start()
 
         # Start the periodic call in the GUI to check if the queue contains
         # anything
@@ -190,33 +192,18 @@ class ThreadedClient:
         for control in config.Controls:
             pcComms.send(control.ID,control.setValue)
 
-        while self.queue.qsize():
-            try:
-                [ID,value] = self.queue.get(0)
-                # Check contents of message and do what it says
-                for meas in config.Measurements:
-                    if meas.ID==ID:
-                        meas.value = value
-                for control in config.Controls:
-                    if control.ID==ID:
-                        control.value = value
 
-            except:
-                pass
         self.master.after(config.GUIUpdate, self.CANScheduler)
 
-    def workerThread1(self):
+    def workerThreadCAN(self):
         """
-        This is where we handle the asynchronous I/O. For example, it may be
-        a 'select()'.
+        This is where the asynchronous CAN Messages are received.
         One important thing to remember is that the thread has to yield
         control.
         """
 
         while True:
-            newMSG = pcComms.read()
-            if newMSG != None:
-                self.queue.put(newMSG)
+            pcComms.read()
 
 root=tk.Tk()
 format = "%(asctime)s: %(message)s"
@@ -224,8 +211,8 @@ logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
 
 
 config = configManager()
-pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements,type="loopback")
-#pcComms = UART_Comms.UART_Comms(config.Controls,config.Measurements)
+pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements,type="CAN")
+
 
 logginghandler=myLogging.myLogging(config.logging)
 

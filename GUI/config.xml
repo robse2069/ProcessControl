@@ -34,7 +34,7 @@
             minValue="0"
             maxValue="1"
             unit="none"
-            MsgID="4"
+            MsgID="162"
             type="button">
     </control>
 
@@ -43,7 +43,7 @@
             minValue="0"
             maxValue="220"
             unit="Volt"
-            MsgID="5">
+            MsgID="42">
     </measurement>
     <communication method="loopback"
         ></communication>
