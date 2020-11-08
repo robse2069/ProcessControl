@@ -101,7 +101,7 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
+  InitCANHandler(&hcan);
 #if DebugActive == 1
 	print("Begin Init\n", 11);
 #endif

@@ -78,6 +78,8 @@ void Error_Handler(void);
 #define OUT_D_Green_N_GPIO_Port GPIOB
 #define OUT_D_Red_N_Pin GPIO_PIN_15
 #define OUT_D_Red_N_GPIO_Port GPIOB
+#define OUT_D_Trigger_Pin GPIO_PIN_8
+#define OUT_D_Trigger_GPIO_Port GPIOC
 #define CAN_Rx_Pin GPIO_PIN_11
 #define CAN_Rx_GPIO_Port GPIOA
 #define CAN_Tx_Pin GPIO_PIN_12
