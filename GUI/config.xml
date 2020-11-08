@@ -6,7 +6,7 @@
             minValue="0"
             maxValue="1"
             unit="none"
-            MsgID="1234"
+            MsgID="1"
             type="button">
     </control>
     <control name="GOx Main"
@@ -15,7 +15,7 @@
             minValue="0"
             maxValue="1"
             unit="none"
-            MsgID="1234"
+            MsgID="2"
             type="button">
     </control>
     <control name="Ethanol pre"
@@ -24,7 +24,7 @@
             minValue="0"
             maxValue="1"
             unit="none"
-            MsgID="1234"
+            MsgID="3"
             type="button">
     </control>
 
@@ -34,7 +34,7 @@
             minValue="0"
             maxValue="1"
             unit="none"
-            MsgID="42"
+            MsgID="162"
             type="button">
     </control>
 
@@ -43,7 +43,7 @@
             minValue="0"
             maxValue="220"
             unit="Volt"
-            MsgID="1235">
+            MsgID="42">
     </measurement>
     <communication method="loopback"
         ></communication>

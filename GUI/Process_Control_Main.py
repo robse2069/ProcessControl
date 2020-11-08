@@ -8,11 +8,15 @@ import control as controlhandler
 import measurement as meashandler
 import myLogging
 import sys
+import can
+import struct
+
+import queue
 
 
 class myGUIClass:
-    def __init__(self):
-        self.window = tk.Tk()
+    def __init__(self, master):
+        self.window = master
         self.GUIControls=[]
         self.GUIControlsReadback=[]
         self.GUIMeasurementsLabels=[]
@@ -71,8 +75,7 @@ class myGUIClass:
         #start updater for all displayed values
         self.update()
         self.callLogging()
-        self.CANScheduler
-        self.window.mainloop()
+        #self.CANScheduler
 
     def toggleLogging(self):
         filename=self.ent_filename.get()
@@ -84,9 +87,9 @@ class myGUIClass:
         # update control readbacks
         for setValue in self.GUIControlsReadback:
             if config.Controls[iterator].unit != "none":
-                setValue["text"] = config.Controls[iterator].setValue + " " + config.Controls[iterator].unit
+                setValue["text"] = config.Controls[iterator].value + " " + config.Controls[iterator].unit
             else:
-                setValue["text"] = config.Controls[iterator].setValue
+                setValue["text"] = config.Controls[iterator].value
             iterator += 1
 
         #update measurements
@@ -109,16 +112,6 @@ class myGUIClass:
 
 
 
-    def CANScheduler(self):
-        for control in config.Controls:
-            pcComms.send(control.ID,control.setValue)
-
-        recvBuffer = pcComms.read()
-        for recv in recvBuffer:
-            pass
-        self.window.after(logginghandler.cycleTime/2, self.CANScheduler)
-
-
 class configManager:
     def __init__(self):
 
@@ -131,7 +124,7 @@ class configManager:
         ListOfControls = root.findall('control')
         for iterator in ListOfControls:
             try:
-                self.Controls.append(controlhandler.control(iterator.attrib['name'],int(iterator.attrib['setValue']),int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],iterator.attrib['MsgID'],iterator.attrib['type']))
+                self.Controls.append(controlhandler.control(iterator.attrib['name'],int(iterator.attrib['setValue']),int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],int(iterator.attrib['MsgID']),iterator.attrib['type']))
             except:
                 sys.exit("Config import crashed. Check config.xml")
 
@@ -140,7 +133,7 @@ class configManager:
         ListOfMeasurements = root.findall('measurement')
         for iterator in ListOfMeasurements:
             try:
-                self.Measurements.append(meashandler.measurement(iterator.attrib['name'],int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],iterator.attrib['MsgID']))
+                self.Measurements.append(meashandler.measurement(iterator.attrib['name'],int(iterator.attrib['value']),int(iterator.attrib['minValue']),int(iterator.attrib['maxValue']),iterator.attrib['unit'],int(iterator.attrib['MsgID'])))
             except:
                 sys.exit("Config import crashed. Check config.xml")
 
@@ -165,13 +158,65 @@ class configManager:
             tempLogging['objList'].append(object)
         self.logging=tempLogging
 
+class ThreadedClient:
+    def __init__(self,master):
+        self.master=master
 
+        # Create the queue
+        self.queue = queue.Queue()
+
+        # Set up the GUI part
+        self.gui = myGUIClass(master)
+
+        # Set up the thread to do asynchronous I/O
+        # More can be made if necessary
+        self.can0 = can.interface.Bus(channel='can0', bustype='socketcan_ctypes')
+        self.threadCAN = threading.Thread(target=self.workerThreadCAN)
+        self.threadCAN.start()
+
+        # Start the periodic call in the GUI to check if the queue contains
+        # anything
+        self.CANScheduler()
+
+
+
+
+#        self.window.mainloop()
+
+
+
+    def CANScheduler(self):
+        # function is polling the can recv queue, decodes information and updates measurements
+        # control updates are also send out regularly
+
+        for control in config.Controls:
+            pcComms.send(control.ID,control.setValue)
+
+
+        self.master.after(config.GUIUpdate, self.CANScheduler)
+
+    def workerThreadCAN(self):
+        """
+        This is where the asynchronous CAN Messages are received.
+        One important thing to remember is that the thread has to yield
+        control.
+        """
+
+        while True:
+            pcComms.read()
+
+root=tk.Tk()
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
 
 
 config = configManager()
-#pcComms = PC_Comms.PC_Comms(config.commsMethod)
+pcComms = PC_Comms.PC_Comms(config.Controls,config.Measurements,type="CAN")
+
 
 logginghandler=myLogging.myLogging(config.logging)
-myGUIClass()
+
+client=ThreadedClient(root)
+root.mainloop()
+
+logginghandler.stopLogging()
