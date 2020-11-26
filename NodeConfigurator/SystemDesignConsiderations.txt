@@ -65,7 +65,6 @@ GUI(tkinter)
             calls readNodeData
         writeParameters
         WriteControl
-        ConfigDone
 
     updateValues
 
