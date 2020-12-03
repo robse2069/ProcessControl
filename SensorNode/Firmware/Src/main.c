@@ -100,6 +100,7 @@ int main(void)
   MX_CAN_Init();
   MX_ADC1_Init();
   MX_TIM3_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   InitCANHandler(&hcan);
 #if DebugActive == 1
@@ -107,13 +108,17 @@ int main(void)
 #endif
 	InitDataHandler();
 	InitCANHandler(&hcan);
+	InitPulseInputHandler(&htim3);
+
 	Statehandler(InitComplete);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
 		if (RuntimeData.flags.sendCAN == 1) {
+			SensorHandler_CreateMeasurement();
 			CAN_PublishData(&hcan);
 			if (RuntimeData.flags.myPin == 0) {
 				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);

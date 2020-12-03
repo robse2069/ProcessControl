@@ -25,7 +25,7 @@ void InitDataHandler(void){
 	strcpy(Constants.unit,"Dummy");
 	strcpy(Constants.name,"MySensor");
 	Constants.updaterate_ms=500;
-	Constants.nodeType=	SensorVoltage;
+	Constants.nodeType=	SensorFreqency;
 	Constants.lastErrorcode=All_Fine;
 
 	RuntimeData.value=0;

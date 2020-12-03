@@ -11,6 +11,8 @@
 #include "stdint.h"
 
 typedef enum{
+	SensorResistive,
+	SensorResistiveDifferential,
 	SensorVoltage,
 	SensorVoltageDifferential,
 	SensorFreqency,
@@ -42,11 +44,11 @@ typedef struct{
 }Flags_t;
 
 typedef struct{
-uint16_t valueDefault;
-uint16_t valueMax;
-uint16_t valueMin;
-uint16_t valueOffset;
-uint16_t valueMultiplier_m;
+int16_t valueDefault;
+int16_t valueMax;
+int16_t valueMin;
+int16_t valueOffset;
+int16_t valueMultiplier_m;
 uint8_t CanID;
 uint8_t unit[8];
 uint8_t name[8];
@@ -58,9 +60,9 @@ Errorcodes_t lastErrorcode;
 
 
 typedef struct{
-uint16_t value;
-uint16_t valueSet;
-uint16_t valuePrev;
+int16_t value;
+int16_t valueSet;
+int16_t valuePrev;
 uint32_t time_ms;
 uint32_t timeLastupdate_ms;
 Flags_t flags;

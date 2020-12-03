@@ -121,10 +121,8 @@ void CAN_PublishData(CAN_HandleTypeDef *hcan) {
 	uint32_t myMailbox;
 	myMailbox =CAN_TX_MAILBOX0;
 
-	HAL_GPIO_WritePin(OUT_D_Trigger_GPIO_Port,OUT_D_Trigger_Pin,GPIO_PIN_SET);
 	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U){
 		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
 	}
-	HAL_GPIO_WritePin(OUT_D_Trigger_GPIO_Port,OUT_D_Trigger_Pin,GPIO_PIN_RESET);
 
 }

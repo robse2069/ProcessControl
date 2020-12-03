@@ -5,7 +5,7 @@
     <id>UMLGeneric</id>
     <coordinates>
       <x>944</x>
-      <y>272</y>
+      <y>160</y>
       <w>160</w>
       <h>144</h>
     </coordinates>
@@ -19,7 +19,7 @@ recvBuffer</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>0</x>
-      <y>256</y>
+      <y>144</y>
       <w>544</w>
       <h>560</h>
     </coordinates>
@@ -27,11 +27,11 @@ recvBuffer</panel_attributes>
 DataHandler
 -
 Constants
-- uint16_t valueDefault
-- uint16_t valueMax
-- uint16_t valueMin
-- uint16_t valueOffset
-- uint16_t valueMultiplier_m
+- int16_t valueDefault
+- int16_t valueMax
+- int16_t valueMin
+- int16_t valueOffset
+- int16_t valueMultiplier_m
 - uint8_t CanID
 - char[8] unit
 - char[8] name
@@ -41,9 +41,9 @@ Constants
 
 -
 Runtime Data
-- uint16_t value
-- uint16_t valueSet
-- uint16_t valuePrev
+- int16_t value
+- int16_t valueSet
+- int16_t valuePrev
 - uint32_t time_ms
 - uint32_t timeLastupdate_ms
 - Flags_t flags
@@ -54,7 +54,7 @@ Runtime Data
     <id>UMLGeneric</id>
     <coordinates>
       <x>944</x>
-      <y>664</y>
+      <y>552</y>
       <w>160</w>
       <h>112</h>
     </coordinates>
@@ -67,7 +67,7 @@ SensorHandler
     <id>UMLGeneric</id>
     <coordinates>
       <x>16</x>
-      <y>152</y>
+      <y>40</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -79,7 +79,7 @@ Scheduler: TimeSlice</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>184</x>
-      <y>352</y>
+      <y>240</y>
       <w>264</w>
       <h>96</h>
     </coordinates>
@@ -91,7 +91,7 @@ void StoreConstants(void)</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>528</x>
-      <y>600</y>
+      <y>488</y>
       <w>432</w>
       <h>120</h>
     </coordinates>
@@ -106,7 +106,7 @@ valueMultiplier_m</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>536</x>
-      <y>736</y>
+      <y>624</y>
       <w>424</w>
       <h>40</h>
     </coordinates>
@@ -119,7 +119,7 @@ valuePrev</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>528</x>
-      <y>360</y>
+      <y>248</y>
       <w>432</w>
       <h>48</h>
     </coordinates>
@@ -133,7 +133,7 @@ update Frequency
     <id>UMLGeneric</id>
     <coordinates>
       <x>944</x>
-      <y>112</y>
+      <y>0</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -145,7 +145,7 @@ SetupHandler</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1008</x>
-      <y>184</y>
+      <y>72</y>
       <w>112</w>
       <h>104</h>
     </coordinates>
@@ -158,7 +158,7 @@ setup messages
     <id>UMLSequenceAllInOne</id>
     <coordinates>
       <x>24</x>
-      <y>1192</y>
+      <y>1080</y>
       <w>1512</w>
       <h>832</h>
     </coordinates>
@@ -223,20 +223,21 @@ actor-&gt;sched: done</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1184</x>
-      <y>472</y>
+      <x>1208</x>
+      <y>456</y>
       <w>160</w>
-      <h>80</h>
+      <h>160</h>
     </coordinates>
     <panel_attributes>symbol=component
-Timing-Driver</panel_attributes>
+PulseInputHandler
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1184</x>
-      <y>560</y>
+      <x>1208</x>
+      <y>624</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -248,7 +249,7 @@ ADC-Driver</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1096</x>
-      <y>296</y>
+      <y>184</y>
       <w>104</w>
       <h>32</h>
     </coordinates>
@@ -260,7 +261,7 @@ Last Msg</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>944</x>
-      <y>504</y>
+      <y>392</y>
       <w>160</w>
       <h>112</h>
     </coordinates>
@@ -273,7 +274,7 @@ ActorHandler
     <id>Relation</id>
     <coordinates>
       <x>536</x>
-      <y>392</y>
+      <y>280</y>
       <w>424</w>
       <h>296</h>
     </coordinates>
@@ -286,7 +287,7 @@ valueSet</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>528</x>
-      <y>168</y>
+      <y>56</y>
       <w>432</w>
       <h>176</h>
     </coordinates>
@@ -303,7 +304,7 @@ nodeType</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>400</x>
-      <y>112</y>
+      <y>0</y>
       <w>160</w>
       <h>104</h>
     </coordinates>
@@ -321,7 +322,7 @@ Error</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>552</x>
-      <y>152</y>
+      <y>40</y>
       <w>448</w>
       <h>192</h>
     </coordinates>
@@ -334,7 +335,7 @@ Event: Reset</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>552</x>
-      <y>120</y>
+      <y>8</y>
       <w>408</w>
       <h>32</h>
     </coordinates>
@@ -346,7 +347,7 @@ Event: Setup complete</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>552</x>
-      <y>176</y>
+      <y>64</y>
       <w>408</w>
       <h>376</h>
     </coordinates>
@@ -359,7 +360,7 @@ Event: Unlock</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>552</x>
-      <y>200</y>
+      <y>88</y>
       <w>408</w>
       <h>168</h>
     </coordinates>
@@ -371,7 +372,7 @@ State</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>528</x>
-      <y>568</y>
+      <y>456</y>
       <w>432</w>
       <h>104</h>
     </coordinates>
@@ -389,7 +390,7 @@ valueMax</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1184</x>
-      <y>288</y>
+      <y>176</y>
       <w>160</w>
       <h>48</h>
     </coordinates>
@@ -402,7 +403,7 @@ CAN ISR
     <id>UMLSequenceAllInOne</id>
     <coordinates>
       <x>80</x>
-      <y>2088</y>
+      <y>1976</y>
       <w>976</w>
       <h>1552</h>
     </coordinates>
@@ -495,7 +496,7 @@ stateh-&gt;stateh+: state-&gt;\nrunning</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>176</x>
-      <y>856</y>
+      <y>744</y>
       <w>368</w>
       <h>160</h>
     </coordinates>
@@ -510,7 +511,7 @@ DebugActive = 1|0</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>408</x>
-      <y>920</y>
+      <y>808</y>
       <w>128</w>
       <h>80</h>
     </coordinates>
@@ -522,7 +523,7 @@ void print(char* string,uart8_t len);</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>800</x>
-      <y>888</y>
+      <y>776</y>
       <w>160</w>
       <h>112</h>
     </coordinates>
@@ -536,7 +537,7 @@ HAL_UART_Transmit()</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>528</x>
-      <y>944</y>
+      <y>832</y>
       <w>288</w>
       <h>48</h>
     </coordinates>
@@ -550,7 +551,7 @@ timeout = 100</panel_attributes>
     <id>UMLSpecialState</id>
     <coordinates>
       <x>1728</x>
-      <y>128</y>
+      <y>16</y>
       <w>16</w>
       <h>16</h>
     </coordinates>
@@ -561,7 +562,7 @@ timeout = 100</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1816</x>
-      <y>496</y>
+      <y>384</y>
       <w>176</w>
       <h>32</h>
     </coordinates>
@@ -572,7 +573,7 @@ timeout = 100</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1880</x>
-      <y>288</y>
+      <y>176</y>
       <w>72</w>
       <h>32</h>
     </coordinates>
@@ -583,7 +584,7 @@ timeout = 100</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1816</x>
-      <y>536</y>
+      <y>424</y>
       <w>176</w>
       <h>32</h>
     </coordinates>
@@ -594,7 +595,7 @@ timeout = 100</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1816</x>
-      <y>576</y>
+      <y>464</y>
       <w>176</w>
       <h>32</h>
     </coordinates>
@@ -605,7 +606,7 @@ timeout = 100</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1816</x>
-      <y>616</y>
+      <y>504</y>
       <w>176</w>
       <h>32</h>
     </coordinates>
@@ -616,7 +617,7 @@ timeout = 100</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1728</x>
-      <y>128</y>
+      <y>16</y>
       <w>48</w>
       <h>120</h>
     </coordinates>
@@ -628,7 +629,7 @@ Start</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>2016</x>
-      <y>208</y>
+      <y>96</y>
       <w>104</w>
       <h>32</h>
     </coordinates>
@@ -640,7 +641,7 @@ Start</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>2120</x>
-      <y>496</y>
+      <y>384</y>
       <w>176</w>
       <h>32</h>
     </coordinates>
@@ -651,7 +652,7 @@ Start</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1904</x>
-      <y>160</y>
+      <y>48</y>
       <w>176</w>
       <h>144</h>
     </coordinates>
@@ -663,7 +664,7 @@ Value != valueDefault</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1920</x>
-      <y>232</y>
+      <y>120</y>
       <w>160</w>
       <h>72</h>
     </coordinates>
@@ -675,7 +676,7 @@ Value == valueDefault</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1864</x>
-      <y>352</y>
+      <y>240</y>
       <w>96</w>
       <h>48</h>
     </coordinates>
@@ -687,7 +688,7 @@ symbol=substate</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1792</x>
-      <y>312</y>
+      <y>200</y>
       <w>136</w>
       <h>80</h>
     </coordinates>
@@ -699,7 +700,7 @@ Request Setup</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1944</x>
-      <y>296</y>
+      <y>184</y>
       <w>208</w>
       <h>96</h>
     </coordinates>
@@ -711,7 +712,7 @@ Terminate Setup</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1720</x>
-      <y>384</y>
+      <y>272</y>
       <w>160</w>
       <h>144</h>
     </coordinates>
@@ -723,7 +724,7 @@ Request Setup</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1688</x>
-      <y>512</y>
+      <y>400</y>
       <w>144</w>
       <h>48</h>
     </coordinates>
@@ -735,7 +736,7 @@ SetupMsg1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1688</x>
-      <y>552</y>
+      <y>440</y>
       <w>144</w>
       <h>48</h>
     </coordinates>
@@ -747,7 +748,7 @@ SetupMsg2</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1688</x>
-      <y>592</y>
+      <y>480</y>
       <w>144</w>
       <h>48</h>
     </coordinates>
@@ -759,7 +760,7 @@ SetupMsg3</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1984</x>
-      <y>520</y>
+      <y>408</y>
       <w>280</w>
       <h>128</h>
     </coordinates>
@@ -771,7 +772,7 @@ SetupMsg4</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1984</x>
-      <y>496</y>
+      <y>384</y>
       <w>152</w>
       <h>64</h>
     </coordinates>
@@ -786,7 +787,7 @@ sent back</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1952</x>
-      <y>384</y>
+      <y>272</y>
       <w>136</w>
       <h>128</h>
     </coordinates>
@@ -798,7 +799,7 @@ Terminate Setup</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1704</x>
-      <y>232</y>
+      <y>120</y>
       <w>72</w>
       <h>32</h>
     </coordinates>
@@ -809,7 +810,7 @@ Terminate Setup</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1728</x>
-      <y>256</y>
+      <y>144</y>
       <w>168</w>
       <h>72</h>
     </coordinates>
@@ -821,12 +822,72 @@ Init successful</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1768</x>
-      <y>240</y>
+      <y>128</y>
       <w>128</w>
       <h>72</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Reset</panel_attributes>
     <additional_attributes>140.0;70.0;100.0;70.0;100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1464</x>
+      <y>496</y>
+      <w>160</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+TIM3_ISR</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1344</x>
+      <y>496</y>
+      <w>136</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=[&lt;]-[&lt;]
+Capture Value</panel_attributes>
+    <additional_attributes>10.0;20.0;150.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1464</x>
+      <y>576</y>
+      <w>160</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+TIM3_HAL</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1360</x>
+      <y>584</y>
+      <w>120</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=[&gt;]-[&gt;]
+Start Timer</panel_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1232</x>
+      <y>496</y>
+      <w>120</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+void PulseInput_updateMeasurement(uint16_t count)</panel_attributes>
+    <additional_attributes/>
   </element>
 </diagram>

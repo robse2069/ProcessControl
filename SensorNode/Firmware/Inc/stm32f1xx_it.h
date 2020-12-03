@@ -49,8 +49,8 @@
 /* Exported functions prototypes ---------------------------------------------*/
 void SysTick_Handler(void);
 void CAN1_RX1_IRQHandler(void);
+void TIM3_IRQHandler(void);
 /* USER CODE BEGIN EFP */
-void WWDG_IRQHandler(void);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

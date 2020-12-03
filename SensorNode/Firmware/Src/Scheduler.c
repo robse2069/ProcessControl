@@ -21,8 +21,8 @@ RuntimeData.time_ms++;
 		RuntimeData.flags.sendCAN=1;
 
 #if DebugActive == 1
-		RuntimeData.value++;
-		print("schedule\n",9 );
+//		RuntimeData.value++;
+//		print("schedule\n",9 );
 #endif
 	}
 
