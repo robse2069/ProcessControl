@@ -1,13 +1,14 @@
 import tkinter as tk
 import logging
-import time
-import sys
+import os
+import struct
 import can
 
 
 class ConfiguratorGUI():
-    def __init__(self,master,Data):
+    def __init__(self,master,Node):
         self.window=master
+        self.Node = Node
 
         #configure windowgrid
         self.window.rowconfigure(list(range(0,12)), minsize=20, weight=1)
@@ -120,9 +121,9 @@ class ConfiguratorGUI():
 
 
         #todo: add all label and not(!) entry fields
-
-        self.window.ent_canID.delete(0,20)
-        self.window.ent_canID.insert(0,hex(Data.CanID_8U))
+        #todo: add a method to automatically update when no buttons are pressed.
+        #self.window.ent_canID.delete(0,20)
+        #self.window.ent_canID.insert(0,hex(Node.CanID_16U))
 
         self.window.after(500, self.update)
 
@@ -130,11 +131,11 @@ class ConfiguratorGUI():
 
     def selectNode(self):
         try:
-            Data.CanID_8U = int(self.window.ent_nodeID.get())
+            Node.CanID_16U = int(self.window.ent_nodeID.get())
         except:
-            Data.CanID_8U = int(self.window.ent_nodeID.get(),16)
-
-        Data.readNodeData()
+            Node.CanID_16U = int(self.window.ent_nodeID.get(),16)
+        Node.requestSetup()
+        Node.readNodeData()
 
 
     def writeControl(self):
@@ -143,13 +144,27 @@ class ConfiguratorGUI():
         pass
 
     def resetLastErrorcode(self):
-        #todo: set last errorcode = all fine
-        Data.writeNodeData()
+
+        Node.lastErrorcode=0
+        Node.writeNodeData()
 
 
     def writeParameters(self):
-        # todo: write all information into Data-class
-        Data.writeNodeData()
+        #todo: sanity check on all values
+        self.Node.valueSet_16U=int(self.window.ent_valueSet.get())
+        self.Node.valueDefault_16U=int(self.window.ent_valueDefault.get())
+        self.Node.valueMax_16U=int(self.window.ent_valueMax.get())
+        self.Node.valueMin_16U=int(self.window.ent_valueMin.get())
+        self.Node.valueOffset_16U=int(self.window.ent_valueOffset.get())
+        self.Node.valueMultiplier_m_16U=int(self.window.ent_valueMultiplier.get())
+        self.Node.CanID_16U=int(self.window.ent_canID.get())
+        self.Node.unit_8x8U=self.window.ent_unit.get()
+        self.Node.name_8x8U=self.window.ent_name.get()
+        self.Node.updaterate_ms_16U=int(self.window.ent_updaterate_ms.get())
+        #todo: put Nodetype into enum and use drop down menue
+        self.Node.nodeType=int(self.window.ent_nodeType.get())
+
+        Node.writeNodeData()
 
 
 class NodeData():
@@ -161,30 +176,95 @@ class NodeData():
         self.valueMin_16U=0
         self.valueOffset_16U=0
         self.valueMultiplier_m_16U=0
-        self.CanID_8U=0x7ff
+        self.CanID_16U=0x7ff
         self.unit_8x8U=" no unit"
         self.name_8x8U=" no Name"
         self.updaterate_ms_16U=0
         self.nodeType=0
         self.lastErrorcode=0
 
+        # init CAN interface
+        os.system('sudo ip link set can0 type can bitrate 500000')
+        os.system('sudo ifconfig can0 up')
+        self.can0 = can.interface.Bus(channel='can0', bustype='socketcan_ctypes')
+
+    def requestSetup(self):
+        valueBytes = struct.pack(">BH",0x01,self.CanID_16U)
+        msg = can.Message(arbitration_id=0x7f0, data=valueBytes, extended_id=False)
+        self.can0.send(msg)
+        try:
+            self.readNodeData()
+        except:
+            #todo: msgbox should show in case of unresponding Node
+            tk.messagebox.showwarning(title="Connection Error", message="Node is not responding")
+
     def readNodeData(self):
 
-        raise Exception("not yet implemented")
+        #Setup MSG 1
+        CANRecvdMsg = self.can0.recv(2.0)
+        assert (CANRecvdMsg.arbitration_id == 0x7F1), "unexpected arbitration ID"
+        self.name_8x8U=str(CANRecvdMsg.data)
+        #Setup MSG 2
+        CANRecvdMsg = self.can0.recv(2.0)
+        assert (CANRecvdMsg.arbitration_id == 0x7F2), "unexpected arbitration ID"
+        self.unit_8x8U=str(CANRecvdMsg.data)
+        # Setup MSG 3
+        CANRecvdMsg = self.can0.recv(2.0)
+        assert (CANRecvdMsg.arbitration_id == 0x7F3), "unexpected arbitration ID"
+        self.value_16U,self.valueMax_16U,self.valueDefault_16U,self.updaterate_ms_16U = struct.unpack('>HHHH',CANRecvdMsg.data)
+        # Setup MSG 4
+        CANRecvdMsg = self.can0.recv(2.0)
+        assert (CANRecvdMsg.arbitration_id == 0x7F4), "unexpected arbitration ID"
+        self.nodeType,self.CanID_16U,self.valueOffset_16U,self.valueMultiplier_m_16U,self.lastErrorcodelastErrorcode = struct.unpack('>BHHHB',CANRecvdMsg.data)
+
+
 
     def writeNodeData(self):
-        #todo: write messages
-        # refresh all information
-        self.readNodeData()
+        #Setup MSG 1
+        #todo: pack string into bytes
+        data = struct.pack('>B',self.name_8x8U)
+        msg = can.Message(arbitration_id=0x7F1, data=data, extended_id=False)
+        self.can0.send(msg)
+        #Setup MSG 2
+        #todo: pack string into bytes
+        data = struct.pack('>B', self.unit_8x8U)
+        msg = can.Message(arbitration_id=0x7F2, data=data, extended_id=False)
+        self.can0.send(msg)
+        # Setup MSG 3
+        data = struct.pack('>HHHH', self.value_16U,self.valueMax_16U,self.valueDefault_16U,self.updaterate_ms_16U)
+        msg = can.Message(arbitration_id=0x7F3, data=data, extended_id=False)
+        self.can0.send(msg)
+        # Setup MSG 4
+        data = struct.pack('>BHHHB', self.nodeType,self.CanID_16U,self.valueOffset_16U,self.valueMultiplier_m_16U,self.lastErrorcodelastErrorcode)
+        msg = can.Message(arbitration_id=0x7F4, data=data, extended_id=False)
+        self.can0.send(msg)
 
+
+
+        # refresh all information
+        try:
+            self.readNodeData()
+        except:
+            #todo: msgbox should show in case of unresponding Node
+            tk.messagebox.showwarning(title="Connection Error", message="Node is not responding")
+
+
+
+
+
+    def __del__(self):
+        try:
+            os.system('sudo ifconfig can0 down')
+        except:
+            pass
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
 
-Data=NodeData()
+Node=NodeData()
 root=tk.Tk()
 
 
-GUI=ConfiguratorGUI(root,Data)
+GUI=ConfiguratorGUI(root,Node)
 
 root.mainloop()
