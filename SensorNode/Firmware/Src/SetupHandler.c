@@ -9,9 +9,15 @@
 #include "Debug.h"
 
 
-void SendSetupMsgs() {
+void SendConfiguration() {
 
 	if (DebugActive) {
 		print("Sending Setup Messages back is not yet implemented\n", 51);
 	}
+}
+
+
+
+void checkConfiguration(void){
+
 }

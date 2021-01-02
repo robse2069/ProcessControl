@@ -66,7 +66,7 @@ void Statehandler(uint8_t event) {
 	default:
 		//default to error if none of the statechanges above are met
 		SystemState = Error;
-		Constants.lastErrorcode = Illegal_State_Change_requested;
+		Constants.lastErrorcode = Illegal_State_Change_request;
 		StoreConstants();
 		if (DebugActive)
 			print("Statechange: Illegal Statechange -> Error\n",38);

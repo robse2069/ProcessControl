@@ -24,7 +24,7 @@ typedef enum{
 }nodeType_t;
 
 typedef enum{
-	All_Fine,
+	Alles_Fine,
 	Not_Implemented,
 	Value_too_high,
 	Value_too_low,
@@ -33,13 +33,17 @@ typedef enum{
 	Default_too_low,
 	Value_multiplier_equals_0,
 	Updaterate_out_of_bounds,
-	Illegal_State_Change_requested,
+	Illegal_State_Change_request,
 	CAN_Error,
 }Errorcodes_t;
 
 typedef struct{
 	uint32_t sendCAN:1;
+	uint32_t sendConfig:1;
+	uint32_t getCAN:1;
+	uint32_t sendError:1;
 	uint32_t myPin:1;		// indicates LED Status while debugging
+
 
 }Flags_t;
 

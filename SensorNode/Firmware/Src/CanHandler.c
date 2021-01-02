@@ -21,8 +21,30 @@ void InitCANHandler(CAN_HandleTypeDef *hcan) {
 	 Constants.lastErrorcode = CAN_Error;
 	 Statehandler(ErrorOccured);
 	 }*/
-	HAL_CAN_Start(hcan);
 
+	CAN_FilterTypeDef sf;
+	sf.FilterBank = 0;
+	sf.FilterMode = CAN_FILTERMODE_IDMASK;
+	sf.FilterScale = CAN_FILTERSCALE_16BIT;
+	sf.FilterIdLow = 0xffff;
+	sf.FilterIdHigh = 0x1fff;
+	sf.FilterMaskIdLow = 0x0000;
+	sf.FilterMaskIdHigh = 0x0000;
+	sf.FilterFIFOAssignment = CAN_RX_FIFO0;
+	sf.SlaveStartFilterBank = 0;
+	sf.FilterActivation = ENABLE;
+	if (HAL_CAN_ConfigFilter(hcan, &sf) != HAL_OK) {
+	    Error_Handler();
+	}
+
+	uint32_t myInterrupts = CAN_IT_RX_FIFO0_MSG_PENDING || CAN_IT_RX_FIFO1_MSG_PENDING;
+	if (HAL_CAN_ActivateNotification(hcan,myInterrupts) != HAL_OK) {
+	    Error_Handler();
+	}
+
+	if (HAL_CAN_Start(hcan) != HAL_OK) {
+	    Error_Handler();
+	}
 
 }
 
@@ -37,9 +59,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 			if (data[CAN_NODECOMMAND] == CAN_REQUEST_SETUP) {
 				Statehandler(RequestSetup);
 			}
-			if (data[CAN_NODECOMMAND] == CAN_TERMINATE_SETUP) {
-				Statehandler(SetupComplete);
-			}
+
 		}
 	} else if (ID == CAN_MSG_SETUP_MSG_1) {
 
@@ -83,7 +103,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 			Constants.lastErrorcode = data[CAN_ERRORCODE];
 		}
 		StoreConstants();
-		SendSetupMsgs();
+		RuntimeData.flags.sendConfig = 1;
 	} else if (ID == Constants.CanID) {
 
 		// This is the ID that the Node was configured to.
@@ -96,7 +116,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 }
 void CAN_PublishData(CAN_HandleTypeDef *hcan) {
 
-	print("CAN\n", 4);
+	//print("CAN\n", 4);
 
 	CAN_TxHeaderTypeDef myHeader;
 	uint8_t myData[8];
@@ -119,10 +139,105 @@ void CAN_PublishData(CAN_HandleTypeDef *hcan) {
 	myData[CAN_ERRORCODE] = Constants.lastErrorcode;
 
 	uint32_t myMailbox;
-	myMailbox =CAN_TX_MAILBOX0;
+	myMailbox = CAN_TX_MAILBOX0;
 
-	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U){
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
 		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
 	}
+
+}
+
+void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
+
+	print("CAN\n", 4);
+
+	CAN_TxHeaderTypeDef myHeader;
+	uint8_t myData[8];
+	uint32_t myMailbox;
+
+	myHeader.DLC = 8;
+	myHeader.ExtId = 0;
+	myHeader.IDE = CAN_ID_STD;
+	myHeader.RTR = CAN_RTR_DATA;
+	myHeader.TransmitGlobalTime = DISABLE;
+
+	// SetupMSG 1
+	myHeader.StdId = 0x7F1;
+	for (uint8_t i = 0; i < 8; i++) {
+		myData[i] = Constants.name[i];
+	}
+	myMailbox = CAN_TX_MAILBOX0;
+
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
+		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+	}
+
+	// SetupMSG 2
+	myHeader.StdId = 0x7F2;
+	for (uint8_t i = 0; i < 8; i++) {
+		myData[i] = Constants.unit[i];
+	}
+	myMailbox = CAN_TX_MAILBOX1;
+
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
+		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+	}
+
+	// SetupMSG 3
+	myHeader.StdId = 0x7F3;
+
+	myData[0] = (Constants.valueMin >> 8);
+	myData[1] = (Constants.valueMin && 0xff);
+	myData[2] = (Constants.valueMax >> 8);
+	myData[3] = (Constants.valueMax && 0xff);
+	myData[4] = (Constants.valueDefault >> 8);
+	myData[5] = (Constants.valueDefault && 0xff);
+	myData[6] = (Constants.updaterate_ms >> 8);
+	myData[7] = (Constants.updaterate_ms && 0xff);
+
+	myMailbox = CAN_TX_MAILBOX2;
+
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
+		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+	}
+
+	// SetupMSG 4
+	myHeader.StdId = 0x7F4;
+
+	myData[0] = (Constants.nodeType);
+	myData[1] = (Constants.CanID >> 8);
+	myData[2] = (Constants.CanID && 0xff);
+	myData[3] = (Constants.valueOffset >> 8);
+	myData[4] = (Constants.valueOffset && 0xff);
+	myData[5] = (Constants.valueMultiplier_m >> 8);
+	myData[6] = (Constants.valueMultiplier_m && 0xff);
+	myData[7] = (Constants.lastErrorcode);
+	if (HAL_CAN_IsTxMessagePending(hcan,CAN_TX_MAILBOX0) == 0) {
+		myMailbox = CAN_TX_MAILBOX0;
+
+		if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
+			HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+		}
+	}
+	Statehandler(SetupComplete);
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
+
+	CAN_RxHeaderTypeDef pHeader;
+	uint8_t aData[8];
+	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &pHeader, aData);
+	CAN_HandleRecvMsg(pHeader.StdId,aData);
+
+}
+
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
+
+	CAN_RxHeaderTypeDef pHeader;
+	uint8_t aData[8];
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &pHeader, aData)!=HAL_OK){
+		Error_Handler();
+	}
+	CAN_HandleRecvMsg(pHeader.StdId,aData);
 
 }
