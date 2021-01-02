@@ -32,7 +32,7 @@ Constants
 - int16_t valueMin
 - int16_t valueOffset
 - int16_t valueMultiplier_m
-- uint8_t CanID
+- uint16_t CanID
 - char[8] unit
 - char[8] name
 - uint16_t updaterate_ms
@@ -702,23 +702,23 @@ Request Setup</panel_attributes>
       <x>1944</x>
       <y>184</y>
       <w>208</w>
-      <h>96</h>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Terminate Setup</panel_attributes>
-    <additional_attributes>20.0;100.0;120.0;100.0;120.0;10.0;10.0;10.0</additional_attributes>
+    <additional_attributes>20.0;80.0;120.0;80.0;120.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1720</x>
-      <y>272</y>
-      <w>160</w>
-      <h>144</h>
+      <x>1952</x>
+      <y>248</y>
+      <w>272</w>
+      <h>152</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Request Setup</panel_attributes>
-    <additional_attributes>180.0;10.0;10.0;10.0;10.0;160.0;120.0;160.0</additional_attributes>
+    <additional_attributes>10.0;20.0;320.0;20.0;320.0;170.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
