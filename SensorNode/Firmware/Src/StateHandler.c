@@ -24,6 +24,7 @@ void Statehandler(uint8_t event) {
 			if (DebugActive)
 				print("Statechange: Init -> Running\n",29);
 		}
+		// todo: All if-clauses need an else-statement to detect illegal state change requests.
 		break;
 	case SetLock:
 		if (SystemState == Running) {
@@ -53,7 +54,7 @@ void Statehandler(uint8_t event) {
 		break;
 	case SetupComplete:
 		if (SystemState == Setup) {
-			SystemState = Init;
+			SystemState = Running;
 			if (DebugActive)
 				print("Statechange: Setup -> Init\n",27);
 		}

@@ -34,16 +34,17 @@ void InitCANHandler(CAN_HandleTypeDef *hcan) {
 	sf.SlaveStartFilterBank = 0;
 	sf.FilterActivation = ENABLE;
 	if (HAL_CAN_ConfigFilter(hcan, &sf) != HAL_OK) {
-	    Error_Handler();
+		Error_Handler();
 	}
 
-	uint32_t myInterrupts = CAN_IT_RX_FIFO0_MSG_PENDING || CAN_IT_RX_FIFO1_MSG_PENDING;
-	if (HAL_CAN_ActivateNotification(hcan,myInterrupts) != HAL_OK) {
-	    Error_Handler();
+	uint32_t myInterrupts = CAN_IT_RX_FIFO0_MSG_PENDING
+			|| CAN_IT_RX_FIFO1_MSG_PENDING;
+	if (HAL_CAN_ActivateNotification(hcan, myInterrupts) != HAL_OK) {
+		Error_Handler();
 	}
 
 	if (HAL_CAN_Start(hcan) != HAL_OK) {
-	    Error_Handler();
+		Error_Handler();
 	}
 
 }
@@ -57,7 +58,14 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 		if (((data[CANID_MSB] << 8) | data[CANID_LSB]) == Constants.CanID) {
 			// listen only if node is addressed by its CAN ID
 			if (data[CAN_NODECOMMAND] == CAN_REQUEST_SETUP) {
+				RuntimeData.flags.sendConfig = 1;
 				Statehandler(RequestSetup);
+
+			}
+			if (data[CAN_NODECOMMAND] == CAN_TERMINATE_SETUP) {
+
+				StoreConstants();
+				// todo: Reboot chip
 			}
 
 		}
@@ -102,7 +110,6 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 					| data[CAN_VALUEMULTIPLIER_LSB];
 			Constants.lastErrorcode = data[CAN_ERRORCODE];
 		}
-		StoreConstants();
 		RuntimeData.flags.sendConfig = 1;
 	} else if (ID == Constants.CanID) {
 
@@ -149,8 +156,6 @@ void CAN_PublishData(CAN_HandleTypeDef *hcan) {
 
 void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 
-	print("CAN\n", 4);
-
 	CAN_TxHeaderTypeDef myHeader;
 	uint8_t myData[8];
 	uint32_t myMailbox;
@@ -171,16 +176,21 @@ void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
 		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
 	}
-
+	while (HAL_CAN_IsTxMessagePending(hcan, CAN_TX_MAILBOX0)) {
+		// wait for message to be send
+	}
 	// SetupMSG 2
 	myHeader.StdId = 0x7F2;
 	for (uint8_t i = 0; i < 8; i++) {
 		myData[i] = Constants.unit[i];
 	}
-	myMailbox = CAN_TX_MAILBOX1;
+	myMailbox = CAN_TX_MAILBOX0;
 
 	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
 		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+	}
+	while (HAL_CAN_IsTxMessagePending(hcan, CAN_TX_MAILBOX0)) {
+		// wait for message to be send
 	}
 
 	// SetupMSG 3
@@ -195,10 +205,13 @@ void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 	myData[6] = (Constants.updaterate_ms >> 8);
 	myData[7] = (Constants.updaterate_ms && 0xff);
 
-	myMailbox = CAN_TX_MAILBOX2;
+	myMailbox = CAN_TX_MAILBOX0;
 
 	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
 		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
+	}
+	while (HAL_CAN_IsTxMessagePending(hcan, CAN_TX_MAILBOX0)) {
+		// wait for message to be send
 	}
 
 	// SetupMSG 4
@@ -212,32 +225,31 @@ void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 	myData[5] = (Constants.valueMultiplier_m >> 8);
 	myData[6] = (Constants.valueMultiplier_m && 0xff);
 	myData[7] = (Constants.lastErrorcode);
-	if (HAL_CAN_IsTxMessagePending(hcan,CAN_TX_MAILBOX0) == 0) {
-		myMailbox = CAN_TX_MAILBOX0;
 
-		if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
-			HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
-		}
+	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {
+		HAL_CAN_AddTxMessage(hcan, &myHeader, myData, &myMailbox);
 	}
-	Statehandler(SetupComplete);
+	while (HAL_CAN_IsTxMessagePending(hcan, CAN_TX_MAILBOX0)) {
+		// wait for message to be send
+	}
 }
 
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 	CAN_RxHeaderTypeDef pHeader;
 	uint8_t aData[8];
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &pHeader, aData);
-	CAN_HandleRecvMsg(pHeader.StdId,aData);
+	CAN_HandleRecvMsg(pHeader.StdId, aData);
 
 }
 
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 	CAN_RxHeaderTypeDef pHeader;
 	uint8_t aData[8];
-	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &pHeader, aData)!=HAL_OK){
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &pHeader, aData) != HAL_OK) {
 		Error_Handler();
 	}
-	CAN_HandleRecvMsg(pHeader.StdId,aData);
+	CAN_HandleRecvMsg(pHeader.StdId, aData);
 
 }

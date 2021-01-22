@@ -711,14 +711,14 @@ Terminate Setup</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1952</x>
+      <x>2112</x>
       <y>248</y>
-      <w>272</w>
+      <w>112</w>
       <h>152</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Request Setup</panel_attributes>
-    <additional_attributes>10.0;20.0;320.0;20.0;320.0;170.0</additional_attributes>
+    <additional_attributes>10.0;20.0;120.0;20.0;120.0;170.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -786,14 +786,14 @@ sent back</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1952</x>
+      <x>1968</x>
       <y>272</y>
-      <w>136</w>
+      <w>120</w>
       <h>128</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Terminate Setup</panel_attributes>
-    <additional_attributes>30.0;140.0;30.0;10.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;140.0;10.0;10.0;60.0;70.0</additional_attributes>
   </element>
   <element>
     <id>UMLState</id>
