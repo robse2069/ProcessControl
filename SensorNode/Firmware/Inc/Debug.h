@@ -13,7 +13,7 @@
 #define DebugActive 1
 
 
-void print(uint8_t* string, uint8_t len);
+//void print(uint8_t* string, uint8_t len);
 void DecodeDebugMessage(uint8_t *debugmessage);
 
 #endif /* DEBUG_H_ */

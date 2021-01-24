@@ -14,8 +14,8 @@ extern Constants_t Constants;
 SensorData_t SensorData;
 
 void InitSensorHandler(void) {
-	SensorData.analog1_mV = 0;
-	SensorData.analog2_mV = 0;
+	SensorData.analog1_mV = 42;
+	SensorData.analog2_mV = 23;
 	SensorData.pulseCount = 0;
 }
 void SensorHandler_CreateMeasurement(void) {

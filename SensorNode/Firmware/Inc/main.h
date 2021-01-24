@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f1xx_hal.h"
+#include "stm32f0xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -58,48 +58,25 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define B1_Pin GPIO_PIN_13
-#define B1_GPIO_Port GPIOC
 #define IN_A_Meas1_Pin GPIO_PIN_0
 #define IN_A_Meas1_GPIO_Port GPIOA
 #define IN_A_Meas2_Pin GPIO_PIN_1
 #define IN_A_Meas2_GPIO_Port GPIOA
-#define UART_Tx_Pin GPIO_PIN_2
-#define UART_Tx_GPIO_Port GPIOA
-#define UART_Rx_Pin GPIO_PIN_3
-#define UART_Rx_GPIO_Port GPIOA
-#define IN_A_HW_Version_Pin GPIO_PIN_4
-#define IN_A_HW_Version_GPIO_Port GPIOA
-#define LD2_Pin GPIO_PIN_5
-#define LD2_GPIO_Port GPIOA
-#define IN_D_PULSE_Pin GPIO_PIN_6
+#define IN_D_PULSE_Pin GPIO_PIN_4
 #define IN_D_PULSE_GPIO_Port GPIOA
-#define OUT_D_Green_N_Pin GPIO_PIN_14
-#define OUT_D_Green_N_GPIO_Port GPIOB
-#define OUT_D_Red_N_Pin GPIO_PIN_15
-#define OUT_D_Red_N_GPIO_Port GPIOB
-#define OUT_D_Actor1_Pin GPIO_PIN_8
-#define OUT_D_Actor1_GPIO_Port GPIOA
 #define CAN_Rx_Pin GPIO_PIN_11
 #define CAN_Rx_GPIO_Port GPIOA
 #define CAN_Tx_Pin GPIO_PIN_12
 #define CAN_Tx_GPIO_Port GPIOA
-#define TMS_Pin GPIO_PIN_13
-#define TMS_GPIO_Port GPIOA
+#define SWO_Pin GPIO_PIN_13
+#define SWO_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
+#define OUT_D_GREEN_Pin GPIO_PIN_4
+#define OUT_D_GREEN_GPIO_Port GPIOB
+#define OUT_D_YELLOW_Pin GPIO_PIN_5
+#define OUT_D_YELLOW_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-#define ERROR_ALL_FINE					0
-#define ERROR_VALUE_TOO_HIGH			1
-#define ERROR_VALUE_TOO_LOW				2
-#define ERROR_PARAM_HIGH_LOW			3
-#define ERROR_DEFAULT_TOO_HIGH			4
-#define ERROR_DEFAULT_TOO_LOW			5
-#define ERROR_VALUE_MULTIPLIER_ZERO		6
-#define ERROR_UPDATERATE				7
-#define ERROR_ILLEGAL_STATE_CHANCE		8
 
 /* USER CODE END Private defines */
 

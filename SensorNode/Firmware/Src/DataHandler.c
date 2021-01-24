@@ -42,8 +42,7 @@ void InitDataHandler(void) {
 
 void StoreConstants(void) {
 #if DebugActive ==1
-	print("Storing Constants to Flash\n", 27);
-	print("Storing Constants to Flash is not yet implemented\n", 50);
+// todo: implement function
 #endif
 
 }

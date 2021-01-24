@@ -242,7 +242,7 @@ PulseInputHandler
       <h>80</h>
     </coordinates>
     <panel_attributes>symbol=component
-ADC-Driver</panel_attributes>
+ADCHandler</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -888,6 +888,18 @@ Start Timer</panel_attributes>
     </coordinates>
     <panel_attributes>symbol=component
 void PulseInput_updateMeasurement(uint16_t count)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1464</x>
+      <y>624</y>
+      <w>160</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+TIM3_HAL</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
