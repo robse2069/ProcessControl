@@ -99,6 +99,9 @@ class ConfiguratorGUI():
         self.window.btn_writeParameters = tk.Button(master=None, text="Write all Parameters to Node", command=self.writeParameters)
         self.window.btn_writeParameters.grid(row=11, column=1)
 
+        self.window.btn_writeParameters = tk.Button(master=None, text="Terminate Setup", command=self.terminateSetup)
+        self.window.btn_writeParameters.grid(row=11, column=2)
+
         # logging
         # self.btn_logging = tk.Button(master=None, text="Start / Stop Logging", command=self.toggleLogging)
         # self.btn_logging.grid(row=3, column=0)
@@ -117,31 +120,73 @@ class ConfiguratorGUI():
 
 
     def update(self):
-        logging.info("updating...")
+        #        logging.info("updating...")
 
 
-        #todo: add all label and not(!) entry fields
-        #todo: add a method to automatically update when no buttons are pressed.
-        #self.window.ent_canID.delete(0,20)
-        #self.window.ent_canID.insert(0,hex(Node.CanID_16U))
+        #todo: how to update entry fields?
+        self.window.lbl_lastErrorcode = Node.lastErrorcode
+        self.window.lbl_value = Node.value_16U
+
+
 
         self.window.after(500, self.update)
 
 
 
     def selectNode(self):
+        # clean up possible old connection
+        try:
+            Node.terminateSetup()
+        except:
+            pass
+
         try:
             Node.CanID_16U = int(self.window.ent_nodeID.get())
         except:
             Node.CanID_16U = int(self.window.ent_nodeID.get(),16)
+
+
         Node.requestSetup()
         Node.readNodeData()
 
+        self.window.ent_name.delete(0, 20)
+        self.window.ent_name.insert(0, Node.name_8x8U)
+
+        self.window.ent_nodeType.delete(0, 20)
+        self.window.ent_nodeType.insert(0, Node.nodeType)  # todo: decode enum
+
+        self.window.ent_valueSet.delete(0, 20)
+        self.window.ent_valueSet.insert(0, Node.valueSet_16U)
+
+        self.window.ent_unit.delete(0, 20)
+        self.window.ent_unit.insert(0, Node.unit_8x8U)
+
+        self.window.ent_valueOffset.delete(0, 20)
+        self.window.ent_valueOffset.insert(0, Node.valueOffset_16U)
+
+        self.window.ent_valueMultiplier.delete(0, 20)
+        self.window.ent_valueMultiplier.insert(0, Node.valueMultiplier_m_16U)
+
+        self.window.ent_valueDefault.delete(0, 20)
+        self.window.ent_valueDefault.insert(0, Node.valueDefault_16U)
+
+        self.window.ent_valueMax.delete(0, 20)
+        self.window.ent_valueMax.insert(0, Node.valueMax_16U)
+
+        self.window.ent_valueMin.delete(0, 20)
+        self.window.ent_valueMin.insert(0, Node.valueMin_16U)
+
+        self.window.ent_canID.delete(0, 20)
+        self.window.ent_canID.insert(0, Node.CanID_16U)
+
+        self.window.ent_updaterate_ms.delete(0, 20)
+        self.window.ent_updaterate_ms.insert(0, Node.updaterate_ms_16U)
 
     def writeControl(self):
-        #todo: write information into Data-class
-        #todo: send Message with setvalue
         pass
+
+
+
 
     def resetLastErrorcode(self):
 
@@ -166,6 +211,9 @@ class ConfiguratorGUI():
 
         Node.writeNodeData()
 
+    def terminateSetup(self):
+        Node.terminateSetup()
+        #todo: set all fields to "not connected"
 
 class NodeData():
     def __init__(self):
@@ -192,22 +240,31 @@ class NodeData():
         valueBytes = struct.pack(">BH",0x01,self.CanID_16U)
         msg = can.Message(arbitration_id=0x7f0, data=valueBytes, extended_id=False)
         self.can0.send(msg)
-        try:
-            self.readNodeData()
-        except:
-            #todo: msgbox should show in case of unresponding Node
-            tk.messagebox.showwarning(title="Connection Error", message="Node is not responding")
+
+    def terminateSetup(self):
+        valueBytes = struct.pack(">BH",0x02,self.CanID_16U)
+        msg = can.Message(arbitration_id=0x7f0, data=valueBytes, extended_id=False)
+        self.can0.send(msg)
+
 
     def readNodeData(self):
 
         #Setup MSG 1
         CANRecvdMsg = self.can0.recv(2.0)
-        assert (CANRecvdMsg.arbitration_id == 0x7F1), "unexpected arbitration ID"
-        self.name_8x8U=str(CANRecvdMsg.data)
+
+        # wait for cache to clear and correct message is received
+        timeoutcounter = 0
+        while CANRecvdMsg.arbitration_id != 0x7f1:
+            CANRecvdMsg = self.can0.recv(0.1)
+            assert timeoutcounter < 50, "Node Timeout"
+            timeoutcounter = timeoutcounter + 1
+
+        self.name_8x8U=CANRecvdMsg.data.decode()
+
         #Setup MSG 2
         CANRecvdMsg = self.can0.recv(2.0)
         assert (CANRecvdMsg.arbitration_id == 0x7F2), "unexpected arbitration ID"
-        self.unit_8x8U=str(CANRecvdMsg.data)
+        self.unit_8x8U=CANRecvdMsg.data.decode()
         # Setup MSG 3
         CANRecvdMsg = self.can0.recv(2.0)
         assert (CANRecvdMsg.arbitration_id == 0x7F3), "unexpected arbitration ID"
@@ -216,18 +273,19 @@ class NodeData():
         CANRecvdMsg = self.can0.recv(2.0)
         assert (CANRecvdMsg.arbitration_id == 0x7F4), "unexpected arbitration ID"
         self.nodeType,self.CanID_16U,self.valueOffset_16U,self.valueMultiplier_m_16U,self.lastErrorcodelastErrorcode = struct.unpack('>BHHHB',CANRecvdMsg.data)
+        print("connected to Node: {}".format(self.name_8x8U))
 
 
 
     def writeNodeData(self):
         #Setup MSG 1
         #todo: pack string into bytes
-        data = struct.pack('>B',self.name_8x8U)
+        data = self.name_8x8U.encode()
         msg = can.Message(arbitration_id=0x7F1, data=data, extended_id=False)
         self.can0.send(msg)
         #Setup MSG 2
         #todo: pack string into bytes
-        data = struct.pack('>B', self.unit_8x8U)
+        data = self.unit_8x8U.encode()
         msg = can.Message(arbitration_id=0x7F2, data=data, extended_id=False)
         self.can0.send(msg)
         # Setup MSG 3
@@ -243,11 +301,12 @@ class NodeData():
 
         # refresh all information
         try:
+            self.requestSetup()
             self.readNodeData()
         except:
             #todo: msgbox should show in case of unresponding Node
-            tk.messagebox.showwarning(title="Connection Error", message="Node is not responding")
-
+            #tk.messagebox.showwarning(title="Connection Error", message="Node is not responding")
+            pass
 
 
 
