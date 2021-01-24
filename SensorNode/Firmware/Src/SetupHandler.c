@@ -11,9 +11,6 @@
 
 void SendConfiguration() {
 
-	if (DebugActive) {
-		print("Sending Setup Messages back is not yet implemented\n", 51);
-	}
 }
 
 

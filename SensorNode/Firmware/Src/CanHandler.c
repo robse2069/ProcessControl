@@ -65,7 +65,7 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 			if (data[CAN_NODECOMMAND] == CAN_TERMINATE_SETUP) {
 
 				StoreConstants();
-				// todo: Reboot chip
+				Statehandler(SetupComplete);
 			}
 
 		}
@@ -197,13 +197,13 @@ void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 	myHeader.StdId = 0x7F3;
 
 	myData[0] = (Constants.valueMin >> 8);
-	myData[1] = (Constants.valueMin && 0xff);
+	myData[1] = (Constants.valueMin & 0xff);
 	myData[2] = (Constants.valueMax >> 8);
-	myData[3] = (Constants.valueMax && 0xff);
+	myData[3] = (Constants.valueMax & 0xff);
 	myData[4] = (Constants.valueDefault >> 8);
-	myData[5] = (Constants.valueDefault && 0xff);
+	myData[5] = (Constants.valueDefault & 0xff);
 	myData[6] = (Constants.updaterate_ms >> 8);
-	myData[7] = (Constants.updaterate_ms && 0xff);
+	myData[7] = (Constants.updaterate_ms & 0xff);
 
 	myMailbox = CAN_TX_MAILBOX0;
 
@@ -219,11 +219,11 @@ void CAN_PublishConfig(CAN_HandleTypeDef *hcan) {
 
 	myData[0] = (Constants.nodeType);
 	myData[1] = (Constants.CanID >> 8);
-	myData[2] = (Constants.CanID && 0xff);
+	myData[2] = (Constants.CanID & 0xff);
 	myData[3] = (Constants.valueOffset >> 8);
-	myData[4] = (Constants.valueOffset && 0xff);
+	myData[4] = (Constants.valueOffset & 0xff);
 	myData[5] = (Constants.valueMultiplier_m >> 8);
-	myData[6] = (Constants.valueMultiplier_m && 0xff);
+	myData[6] = (Constants.valueMultiplier_m & 0xff);
 	myData[7] = (Constants.lastErrorcode);
 
 	if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U) {

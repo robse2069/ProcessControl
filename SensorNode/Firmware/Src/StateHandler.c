@@ -35,7 +35,7 @@ void Statehandler(uint8_t event) {
 		}
 		break;
 	case RequestSetup:
-		if (SystemState == Running) {
+		if ((SystemState == Running) | (SystemState == Setup)) {
 			SystemState = Setup;
 		} else if (SystemState == Error) {
 			SystemState = Setup;
