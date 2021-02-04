@@ -5,12 +5,14 @@
  *      Author: robert
  */
 
+#include "DataHandler.h"
 #include "SensorHandler.h"
-
-#define TICKSPS 10000 // ticks/s
+#include "adc.h"
 
 extern RuntimeData_t RuntimeData;
 extern Constants_t Constants;
+extern ADC_HandleTypeDef hadc;
+
 SensorData_t SensorData;
 
 void InitSensorHandler(void) {
@@ -21,6 +23,7 @@ void InitSensorHandler(void) {
 void SensorHandler_CreateMeasurement(void) {
 	uint32_t tempValue = 0;
 	if (Constants.nodeType == SensorResistive) {
+// todo: configure ADC with 2 channels and DMA.
 		tempValue = SensorData.analog1_mV;
 		//todo: Add calculations according to resistors
 	} else if (Constants.nodeType == SensorResistiveDifferential) {

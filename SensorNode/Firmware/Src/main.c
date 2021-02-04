@@ -106,6 +106,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	StoreConstants();
   	while (1) {
   			if (RuntimeData.flags.sendCAN != 0) {
   				SensorHandler_CreateMeasurement();

@@ -75,5 +75,10 @@ Flags_t flags;
 void InitDataHandler(void);
 
 void StoreConstants(void);
+void unlockFlash(void);
+void eraseFlash(uint32_t page_addr);
+void writeFlash(uint32_t flash_addr, uint16_t *data, uint16_t size);
+void lockFlash(void);
+
 
 #endif /* DATAHANDLER_H_ */

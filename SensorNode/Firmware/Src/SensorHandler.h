@@ -11,6 +11,9 @@
 #include "stdint.h"
 #include "DataHandler.h"
 
+#define TICKSPS 10000 // ticks/s
+
+
 typedef struct{
 	uint16_t analog1_mV;
 	uint16_t analog2_mV;
