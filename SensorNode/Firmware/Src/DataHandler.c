@@ -35,6 +35,11 @@ void InitDataHandler(void) {
 	Constants.valueOffset = FlashMem[3];
 	Constants.valueMultiplier_m = FlashMem[4];
 	Constants.CanID = FlashMem[5];
+	if (Constants.CanID == 0x00){
+		// Adress 0x00 is not allowed but is the initial address at production.
+		// set to 0x7ff as default address for unprogrammed nodes
+		Constants.CanID = 0x7ff;
+	}
 
 	for (uint8_t count = 0; count < 4; count++) {
 		Constants.unit[count * 2] = (uint8_t) (FlashMem[6 + count] & 0xFF);
@@ -44,9 +49,9 @@ void InitDataHandler(void) {
 		Constants.name[count * 2] = (uint8_t) (FlashMem[10 + count] & 0xFF);
 		Constants.name[count * 2 + 1] = (uint8_t) ((FlashMem[10 + count] >> 8) & 0xFF);
 	}
-	Constants.updaterate_ms = FlashMem[8];
-	Constants.nodeType = FlashMem[9];
-	Constants.lastErrorcode = FlashMem[10];
+	Constants.updaterate_ms = FlashMem[14];
+	Constants.nodeType = FlashMem[15];
+	Constants.lastErrorcode = FlashMem[16];
 
 	// initialize runtime data
 	RuntimeData.value = 0;
@@ -71,10 +76,10 @@ void StoreConstants(void) {
 	dataFromConstants[7] = (Constants.unit[3] << 8) | Constants.unit[2];
 	dataFromConstants[8] = (Constants.unit[5] << 8) | Constants.unit[4];
 	dataFromConstants[9] = (Constants.unit[7] << 8) | Constants.unit[6];
-	dataFromConstants[10] = (Constants.name[0] << 8) | Constants.name[1];
-	dataFromConstants[11] = (Constants.name[2] << 8) | Constants.name[3];
-	dataFromConstants[12] = (Constants.name[4] << 8) | Constants.name[5];
-	dataFromConstants[13] = (Constants.name[6] << 8) | Constants.name[7];
+	dataFromConstants[10] = (Constants.name[1] << 8) | Constants.name[0];
+	dataFromConstants[11] = (Constants.name[3] << 8) | Constants.name[2];
+	dataFromConstants[12] = (Constants.name[5] << 8) | Constants.name[4];
+	dataFromConstants[13] = (Constants.name[7] << 8) | Constants.name[6];
 	dataFromConstants[14] = Constants.updaterate_ms;
 	dataFromConstants[15] = Constants.nodeType;
 	dataFromConstants[16] = Constants.lastErrorcode;

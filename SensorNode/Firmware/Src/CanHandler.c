@@ -98,6 +98,9 @@ void CAN_HandleRecvMsg(uint32_t ID, uint8_t *data) {
 					| data[CAN_VALUEDEFAULT_LSB];
 			Constants.updaterate_ms = (data[CAN_UPDATERATE_MSB] << 8)
 					| data[CAN_UPDATERATE_LSB];
+			if (Constants.updaterate_ms > 5000){
+				Constants.updaterate_ms = 5000;
+			}
 		}
 	} else if (ID == CAN_MSG_SETUP_MSG_4) {
 		if (SystemState == Setup) {
