@@ -22,7 +22,7 @@ void InitSensorHandler(void) {
 	InitADCHandler();
 }
 void SensorHandler_CreateMeasurement(void) {
-	uint32_t tempValue = 0;
+	int32_t tempValue = 0;
 	if (Constants.nodeType == SensorResistive) {
 // todo: configure ADC with 2 channels and DMA.
 		tempValue = SensorData.analog1_mV;
@@ -51,7 +51,6 @@ void SensorHandler_CreateMeasurement(void) {
 	RuntimeData.valuePrev = RuntimeData.value;
 
 	// calculate node value from raw sensor values
-	RuntimeData.value = Constants.valueOffset
-			+ (Constants.valueMultiplier_m * tempValue) / 1000;
+	RuntimeData.value = (int16_t) ( tempValue * Constants.valueMultiplier_m  / 1000 + Constants.valueOffset);
 
 }

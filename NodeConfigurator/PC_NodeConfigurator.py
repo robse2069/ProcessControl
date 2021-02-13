@@ -50,6 +50,28 @@ class ConfiguratorGUI():
         self.window.btn_writeControl = tk.Button(master=None, text="Write Set Value", command=self.writeControl)
         self.window.btn_writeControl.grid(row=6, column=0)
 
+
+        # Entrys to calculate linear approximation
+        self.window.ent_T1=tk.Entry(master=None,width = 10)
+        self.window.ent_T1.grid(row=7, column=2)
+        self.window.ent_T1.insert(0, 'Value 1')
+
+        self.window.ent_L1=tk.Entry(master=None,width = 10)
+        self.window.ent_L1.grid(row=8, column=2)
+        self.window.ent_L1.insert(0, 'Raw Value 1')
+
+        self.window.ent_T2=tk.Entry(master=None,width = 10)
+        self.window.ent_T2.grid(row=9, column=2)
+        self.window.ent_T2.insert(0, 'Value 2')
+
+        self.window.ent_L2=tk.Entry(master=None,width = 10)
+        self.window.ent_L2.grid(row=10, column=2)
+        self.window.ent_L2.insert(0, 'Raw Value 2')
+
+        self.window.btn_calParameters = tk.Button(master=None, text="Calculate parameters", command=self.calcParameters)
+        self.window.btn_calParameters.grid(row=10, column=0)
+
+
         self.window.lbl_valueOffsetDescr = tk.Label(master=None, text="Offset")
         self.window.lbl_valueOffsetDescr.grid(row=8, column=0)
         self.window.ent_valueOffset=tk.Entry(master=None,width = 10)
@@ -99,7 +121,7 @@ class ConfiguratorGUI():
         self.window.btn_writeParameters = tk.Button(master=None, text="Write all Parameters to Node", command=self.writeParameters)
         self.window.btn_writeParameters.grid(row=11, column=1)
 
-        self.window.btn_writeParameters = tk.Button(master=None, text="Terminate Setup", command=self.terminateSetup)
+        self.window.btn_writeParameters = tk.Button(master=None, text="Write to Flash and end setup", command=self.terminateSetup)
         self.window.btn_writeParameters.grid(row=11, column=2)
 
         # logging
@@ -123,10 +145,14 @@ class ConfiguratorGUI():
         #        logging.info("updating...")
 
 
-        #todo: how to update entry fields?
-        self.window.lbl_lastErrorcode = Node.lastErrorcode
-        self.window.lbl_value = Node.value_16U
+        CANRecvdMsg = Node.can0.recv(500)
+        if CANRecvdMsg.arbitration_id == Node.CanID_16U:
+            Node.value_16, Node.valueSet_16, Node.valueDefault_16, Node.state,Node.lastErrorcode = struct.unpack('>hhhBB',CANRecvdMsg.data)
 
+
+
+        self.window.lbl_lastErrorcode = Node.lastErrorcode
+        self.window.lbl_value.config(text=Node.value_16)
 
 
         self.window.after(500, self.update)
@@ -156,25 +182,25 @@ class ConfiguratorGUI():
         self.window.ent_nodeType.insert(0, Node.nodeType)  # todo: decode enum
 
         self.window.ent_valueSet.delete(0, 20)
-        self.window.ent_valueSet.insert(0, Node.valueSet_16U)
+        self.window.ent_valueSet.insert(0, Node.valueSet_16)
 
         self.window.ent_unit.delete(0, 20)
         self.window.ent_unit.insert(0, Node.unit_8x8U)
 
         self.window.ent_valueOffset.delete(0, 20)
-        self.window.ent_valueOffset.insert(0, Node.valueOffset_16U)
+        self.window.ent_valueOffset.insert(0, Node.valueOffset_16)
 
         self.window.ent_valueMultiplier.delete(0, 20)
-        self.window.ent_valueMultiplier.insert(0, Node.valueMultiplier_m_16U)
+        self.window.ent_valueMultiplier.insert(0, Node.valueMultiplier_m_16)
 
         self.window.ent_valueDefault.delete(0, 20)
-        self.window.ent_valueDefault.insert(0, Node.valueDefault_16U)
+        self.window.ent_valueDefault.insert(0, Node.valueDefault_16)
 
         self.window.ent_valueMax.delete(0, 20)
-        self.window.ent_valueMax.insert(0, Node.valueMax_16U)
+        self.window.ent_valueMax.insert(0, Node.valueMax_16)
 
         self.window.ent_valueMin.delete(0, 20)
-        self.window.ent_valueMin.insert(0, Node.valueMin_16U)
+        self.window.ent_valueMin.insert(0, Node.valueMin_16)
 
         self.window.ent_canID.delete(0, 20)
         self.window.ent_canID.insert(0, Node.CanID_16U)
@@ -196,12 +222,12 @@ class ConfiguratorGUI():
 
     def writeParameters(self):
         #todo: sanity check on all values
-        self.Node.valueSet_16U=int(self.window.ent_valueSet.get())
-        self.Node.valueDefault_16U=int(self.window.ent_valueDefault.get())
-        self.Node.valueMax_16U=int(self.window.ent_valueMax.get())
-        self.Node.valueMin_16U=int(self.window.ent_valueMin.get())
-        self.Node.valueOffset_16U=int(self.window.ent_valueOffset.get())
-        self.Node.valueMultiplier_m_16U=int(self.window.ent_valueMultiplier.get())
+        self.Node.valueSet_16=int(self.window.ent_valueSet.get())
+        self.Node.valueDefault_16=int(self.window.ent_valueDefault.get())
+        self.Node.valueMax_16=int(self.window.ent_valueMax.get())
+        self.Node.valueMin_16=int(self.window.ent_valueMin.get())
+        self.Node.valueOffset_16=int(self.window.ent_valueOffset.get())
+        self.Node.valueMultiplier_m_16=int(self.window.ent_valueMultiplier.get())
         self.Node.CanID_16U=int(self.window.ent_canID.get())
         self.Node.unit_8x8U=self.window.ent_unit.get()
         self.Node.name_8x8U=self.window.ent_name.get()
@@ -211,25 +237,45 @@ class ConfiguratorGUI():
 
         Node.writeNodeData()
 
+
+    def calcParameters(self):
+        T1 = int(self.window.ent_T1.get())
+        L1 = int(self.window.ent_L1.get())
+
+        T2 = int(self.window.ent_T2.get())
+        L2 = int(self.window.ent_L2.get())
+
+        b = (T1 * L2 - T2 * L1) / (L2 - L1)
+        a = (T2 - b) / L2 * 1000
+
+
+
+        self.window.ent_valueMultiplier.delete(0, 20)
+        self.window.ent_valueOffset.delete(0, 20)
+        self.window.ent_valueMultiplier.insert(0, int(a))
+        self.window.ent_valueOffset.insert(0, int(b))
+
+
     def terminateSetup(self):
         Node.terminateSetup()
         #todo: set all fields to "not connected"
 
 class NodeData():
     def __init__(self):
-        self.value_16U=0
-        self.valueSet_16U=0
-        self.valueDefault_16U=0
-        self.valueMax_16U=0
-        self.valueMin_16U=0
-        self.valueOffset_16U=0
-        self.valueMultiplier_m_16U=0
+        self.value_16=0
+        self.valueSet_16=0
+        self.valueDefault_16=0
+        self.valueMax_16=0
+        self.valueMin_16=0
+        self.valueOffset_16=0
+        self.valueMultiplier_m_16=0
         self.CanID_16U=0x7ff
         self.unit_8x8U=" no unit"
         self.name_8x8U=" no Name"
         self.updaterate_ms_16U=0
         self.nodeType=0
         self.lastErrorcode=0
+        self.state=-1 # not connected
 
         # init CAN interface
         os.system('sudo ip link set can0 type can bitrate 500000')
@@ -268,11 +314,11 @@ class NodeData():
         # Setup MSG 3
         CANRecvdMsg = self.can0.recv(2.0)
         assert (CANRecvdMsg.arbitration_id == 0x7F3), "unexpected arbitration ID"
-        self.value_16U,self.valueMax_16U,self.valueDefault_16U,self.updaterate_ms_16U = struct.unpack('>HHHH',CANRecvdMsg.data)
+        self.value_16,self.valueMax_16,self.valueDefault_16,self.updaterate_ms_16U = struct.unpack('>hhhH',CANRecvdMsg.data)
         # Setup MSG 4
         CANRecvdMsg = self.can0.recv(2.0)
         assert (CANRecvdMsg.arbitration_id == 0x7F4), "unexpected arbitration ID"
-        self.nodeType,self.CanID_16U,self.valueOffset_16U,self.valueMultiplier_m_16U,self.lastErrorcodelastErrorcode = struct.unpack('>BHHHB',CANRecvdMsg.data)
+        self.nodeType,self.CanID_16U,self.valueOffset_16,self.valueMultiplier_m_16,self.lastErrorcodelastErrorcode = struct.unpack('>BHhhB',CANRecvdMsg.data)
         print("connected to Node: {}".format(self.name_8x8U))
 
 
@@ -289,11 +335,11 @@ class NodeData():
         msg = can.Message(arbitration_id=0x7F2, data=data, extended_id=False)
         self.can0.send(msg)
         # Setup MSG 3
-        data = struct.pack('>HHHH', self.value_16U,self.valueMax_16U,self.valueDefault_16U,self.updaterate_ms_16U)
+        data = struct.pack('>hhhH', self.value_16,self.valueMax_16,self.valueDefault_16,self.updaterate_ms_16U)
         msg = can.Message(arbitration_id=0x7F3, data=data, extended_id=False)
         self.can0.send(msg)
         # Setup MSG 4
-        data = struct.pack('>BHHHB', self.nodeType,self.CanID_16U,self.valueOffset_16U,self.valueMultiplier_m_16U,self.lastErrorcodelastErrorcode)
+        data = struct.pack('>BHhhB', self.nodeType,self.CanID_16U,self.valueOffset_16,self.valueMultiplier_m_16,self.lastErrorcodelastErrorcode)
         msg = can.Message(arbitration_id=0x7F4, data=data, extended_id=False)
         self.can0.send(msg)
 
