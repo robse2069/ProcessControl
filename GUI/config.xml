@@ -45,6 +45,13 @@
             unit="Volt"
             MsgID="42">
     </measurement>
+       <measurement name="Ambient Temperature"
+            value="0"
+            minValue="0"
+            maxValue="100"
+            unit="°C"
+            MsgID="5">
+    </measurement>
     <communication method="loopback"
         ></communication>
     <GUIUpdate name="Updaterate" unit="ms">
