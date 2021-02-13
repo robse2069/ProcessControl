@@ -12,6 +12,9 @@ class control:
 
 
     def toggle(self):
+
+        #todo: add functionality "combine" to toggle multiple channels at the same time
+        # "combine with delay" is too much trouble for this program. Use specific script if needed
         if self.setValue == 0:
             self.setValue=1
         else:
