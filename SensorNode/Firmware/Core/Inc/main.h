@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -58,24 +58,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define IN_A_Meas1_Pin GPIO_PIN_0
-#define IN_A_Meas1_GPIO_Port GPIOA
-#define IN_A_Meas2_Pin GPIO_PIN_1
-#define IN_A_Meas2_GPIO_Port GPIOA
-#define IN_D_PULSE_Pin GPIO_PIN_4
-#define IN_D_PULSE_GPIO_Port GPIOA
-#define CAN_Rx_Pin GPIO_PIN_11
-#define CAN_Rx_GPIO_Port GPIOA
-#define CAN_Tx_Pin GPIO_PIN_12
-#define CAN_Tx_GPIO_Port GPIOA
-#define SWO_Pin GPIO_PIN_13
-#define SWO_GPIO_Port GPIOA
+#define B1_Pin GPIO_PIN_13
+#define B1_GPIO_Port GPIOC
+#define B1_EXTI_IRQn EXTI15_10_IRQn
+#define USART_TX_Pin GPIO_PIN_2
+#define USART_TX_GPIO_Port GPIOA
+#define USART_RX_Pin GPIO_PIN_3
+#define USART_RX_GPIO_Port GPIOA
+#define LD2_Pin GPIO_PIN_5
+#define LD2_GPIO_Port GPIOA
+#define TMS_Pin GPIO_PIN_13
+#define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define OUT_D_GREEN_Pin GPIO_PIN_4
-#define OUT_D_GREEN_GPIO_Port GPIOB
-#define OUT_D_YELLOW_Pin GPIO_PIN_5
-#define OUT_D_YELLOW_GPIO_Port GPIOB
+#define SWO_Pin GPIO_PIN_3
+#define SWO_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -85,5 +83,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

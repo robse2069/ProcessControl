@@ -9,7 +9,7 @@
 #include "Debug.h"
 #include "string.h"
 #include "StateHandler.h"
-#include "stm32f0xx.h"
+#include "stm32f1xx.h"
 
 Constants_t Constants;
 RuntimeData_t RuntimeData;

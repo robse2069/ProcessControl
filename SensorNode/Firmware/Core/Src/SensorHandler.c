@@ -19,7 +19,7 @@ void InitSensorHandler(void) {
 	SensorData.analog1_mV = 42;
 	SensorData.analog2_mV = 23;
 	SensorData.pulseCount = 0;
-	InitADCHandler();
+//	InitADCHandler();	// todo: reactivate
 }
 void SensorHandler_CreateMeasurement(void) {
 	int32_t tempValue = 0;
