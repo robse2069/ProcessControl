@@ -21,12 +21,11 @@ class PC_Comms:
 #        self.type=type  #can be: button, slider, number, string
 
 
-
         if self.commstype=="CAN":
             # init CAN interface
             os.system('sudo ip link set can0 type can bitrate 500000')
             os.system('sudo ifconfig can0 up')
-            self.can0 = can.interface.Bus(channel='can0', bustype='socketcan_ctypes')
+            self.can0 = can.interface.Bus(channel='can0')#, bustype='socketcan_ctypes')
 
 
     def send(self,MsgID,value):
