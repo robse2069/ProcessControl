@@ -12,13 +12,7 @@ The constraints are:
 - The final Python product must run on Linux PCs, laptops, and Raspberry Pi systems.
 - STM32 firmware must be built, flashed, and debugged against physical hardware.
 
-The recommendation is a Windows-first development workflow with the existing Raspberry Pis split by responsibility. The Windows laptop remains the primary editing and host-test environment; Raspberry Pi 1 provides the Linux STM32 build and test-controller environment; Raspberry Pi 3B is part of the SUT and runs the operational Process Control software and CAN interface.
-
-## 1.1 Test Terminology
-
-For integration and system tests, **SUT** means **System Under Test**. In this project the SUT is the behavior being evaluated across the relevant system boundary: the real CSN or CSNs, their firmware and configuration, the CAN bus, the Process Control GUI or Node Configurator, and the required sensor stimuli and observation interfaces.
-
-The CSN and Raspberry Pi 3B are therefore SUT components. The SUT boundary includes the Pi 3B operating environment, Process Control GUI, Node Configurator, CAN adapter/interface, CSN firmware and configuration, CAN bus behavior, and required sensor stimuli and observation interfaces. Raspberry Pi 1, the test software, Arduino stimulus hardware, ST-LINK, and measurement equipment are test infrastructure that drives or observes the SUT. **DUT** is reserved for a narrowly scoped component-level test where one specific device or component is intentionally isolated; it should not be used as the name of the CSN or Pi 3B in integration or system-test documentation.
+The recommendation is a Windows-first development workflow with a Linux hardware and release station. The Windows laptop remains the primary editing and test environment; Linux provides native SocketCAN and embedded hardware access.
 
 ## 2. Recommended Topology
 
@@ -27,17 +21,15 @@ flowchart LR
     WIN[Windows laptop\nno admin rights]
     GIT[Git repository\nshared source of truth]
     SIM[Local Python simulation\nvirtual CAN backend]
-    RPI1[Raspberry Pi 1\nbuild and test controller]
-    RPI3[Raspberry Pi 3B\npart of SUT]
+    LINUX[Linux PC or Raspberry Pi\nmanaged test station]
     CAN[SocketCAN\ncan0 / vcan0]
     STM32[STM32 SensorNode\nCAN + ST-LINK]
     PROD[Linux PC / laptop / Raspberry Pi\nproduction target]
 
     WIN <--> GIT
     WIN --> SIM
-    GIT <--> RPI1
-    RPI1 --> RPI3
-    RPI3 --> CAN
+    GIT <--> LINUX
+    LINUX --> CAN
     CAN <--> STM32
     GIT --> PROD
     PROD --> CAN
@@ -55,19 +47,17 @@ Used for the majority of daily work:
 
 The Windows environment must not require system-wide installation or administrator privileges for normal development.
 
-### Raspberry Pi 1 build and test controller
+### Linux test station
 
-Raspberry Pi 1 is used for operations that require Linux tooling and test control:
+A Linux PC, laptop, or Raspberry Pi is used for operations that require native Linux or physical hardware:
 
-- STM32 buildchain and firmware artifact creation
-- Test orchestration and evidence storage
-- ST-LINK flashing and debugging equipment
-- Arduino stimulus control
+- SocketCAN and `can-utils`
+- USB-CAN adapter or CAN HAT
+- STM32 flashing and debugging
 - Hardware-in-the-loop tests
+- Final Linux packaging and smoke tests
 
-### Raspberry Pi 3B SUT node
-
-Raspberry Pi 3B is part of the SUT. It runs the operational Process Control GUI, Node Configurator, Python runtime, CAN adapter, and SocketCAN interface used by the deployed system. It may be controlled by Pi 1 during automated tests, but its application behavior, runtime configuration, CAN communication, and interaction with the CSN are evaluated as part of the SUT.
+This station may be local to the lab or accessed remotely over SSH or remote desktop.
 
 ### Production target
 
@@ -75,18 +65,16 @@ The production target may be an x86-64 Linux PC/laptop or an ARM Raspberry Pi. T
 
 ## 2.1 HIL Test Deployment
 
-The hardware-in-the-loop (HIL) station consists of two Raspberry Pis with separated responsibilities. Raspberry Pi 1 owns the STM32 buildchain, automated test execution, ST-LINK test equipment, and result storage. Raspberry Pi 3B is part of the SUT: it runs the operational Process Control GUI and Node Configurator, hosts the CAN adapter, and communicates with the real CSN.
+The hardware-in-the-loop (HIL) station consists of two Raspberry Pis. The Raspberry Pi 1, named `testberry.local`, is dedicated to automated test execution. The Raspberry Pi 3B, named `pcberry.local`, is the operator and CAN station: it runs the Process Control GUI with its test interface and the Node Configurator with its test interface, and connects to the real CSN through the CAN adapter.
 
 The Arduino Nano is the electrical test stimulator. It is controlled by the Raspberry Pi 1 and must be connected to the CSN through suitable relay contacts, level protection, filtering, current limiting, and common-ground or isolation circuitry as required by the CSN electrical design.
 
 ```mermaid
 flowchart LR
-  subgraph RPI1[ Raspberry Pi 1 - build and test infrastructure ]
+  subgraph RPI1[ Raspberry Pi 1 - testberry.local - HIL test controller ]
     RF[Robot Framework]
     SU[Test suite]
     LIB[Test libraries\nPython / GPIO / remote control]
-    BUILD[STM32 buildchain\nARM GCC + linker + scripts]
-    DEBUG[ST-LINK debugger\nflashing and SWD]
     RF --> SU
     SU --> LIB
   end
@@ -103,22 +91,18 @@ flowchart LR
     PDRV[Pulse conditioning\nlevel and protection]
   end
 
-  subgraph RPI3[ Raspberry Pi 3B - SUT component ]
-    GUI[Process Control GUI\noperational software]
-    CFG[Node Configurator\noperational software]
+  subgraph RPI3[ Raspberry Pi 3B - pcberry.local - Linux test station ]
+    GUI[Process Control GUI\nwith test interface]
+    CFG[Node Configurator\nwith test interface]
     ADAPTER[CAN adapter\nSocketCAN can0]
   end
 
-  subgraph SUT[System under test]
-    RUNTIME[Pi 3B runtime\nOS, apps, configuration, CAN]
+  subgraph DUT[Device under test]
     CSN[Real CSN\nSTM32 SensorNode]
     RIN[Resistance input]
     VIN[Voltage input]
     PIN[Pulse input]
     CSNCAN[CAN interface]
-    RUNTIME --- GUI
-    RUNTIME --- CFG
-    RUNTIME --- ADAPTER
     RIN --- CSN
     VIN --- CSN
     PIN --- CSN
@@ -135,7 +119,6 @@ flowchart LR
   GUI --> ADAPTER
   CFG --> ADAPTER
   ADAPTER <--> CSNCAN
-  DEBUG <--> |SWD| CSN
   RF -.->|start, monitor, collect results| GUI
   RF -.->|configure and verify| CFG
 ```
@@ -144,26 +127,26 @@ flowchart LR
 
 | Component | Responsibility | Connection |
 | --- | --- | --- |
-| Raspberry Pi 1 | Runs the STM32 buildchain, Robot Framework, test suites, sequencing, assertions, result storage, and ST-LINK tools. | Builds firmware, controls the Arduino Nano, and flashes/debugs the CSN as test infrastructure. |
-| Robot Framework | Coordinates stimulus actions and SUT interactions, then evaluates observed system behavior. | Test libraries connect to GPIO/serial control and the Pi 3B SUT interfaces. |
+| Raspberry Pi 1 (`testberry.local`) | Runs Robot Framework, test suites, sequencing, assertions, and result storage. | Controls the Arduino Nano through USB serial or a network command interface. |
+| Robot Framework | Coordinates stimulus actions and test-interface actions, then evaluates observed CSN behavior. | Test libraries connect to GPIO/serial control and the Pi 3B interfaces. |
 | Arduino Nano | Generates the electrical input conditions for the CSN. | Five GPIOs drive five relay controls; one PWM output drives the filtered voltage path; one software-controlled output drives the pulse path. |
 | Relay/protection board | Selects one of five resistance values and protects the Nano and CSN interfaces. | Relay contacts connect the selected resistor to the CSN resistance input. |
 | PWM/RC circuit | Converts the Nano PWM signal into an adjustable analog stimulus. | Provides an analog signal from 0 V to 5 V to the CSN voltage input. |
 | Pulse conditioning circuit | Shapes and protects the Nano pulse output. | Provides the required pulse levels and timing to the CSN pulse input. |
-| Raspberry Pi 3B | SUT component running the operational GUI, Configurator, Python runtime, and CAN interface. | Communicates with the CSN over the CAN bus and is controlled by Pi 1 during tests. |
-| CAN adapter | SUT communication component providing the CAN interface used by GUI and Configurator. | `can0` on the Raspberry Pi 3B to the CSN CAN bus. |
-| Real CSN | SUT component; executes the actual STM32 firmware and produces CAN measurements/status. | Receives resistance, voltage, and pulse stimuli plus CAN configuration/control. |
+| Raspberry Pi 3B (`pcberry.local`) | Runs the GUI and Configurator test interfaces and hosts the CAN connection to the DUT. | CAN adapter to the CSN CAN bus; network or test-control link to the Pi 1. |
+| CAN adapter | Provides the Linux CAN interface used by GUI and Configurator. | `can0` on the Raspberry Pi 3B to the CSN CAN bus. |
+| Real CSN | Device under test; executes the actual STM32 firmware and produces CAN measurements/status. | Receives resistance, voltage, and pulse stimuli plus CAN configuration/control. |
 
 ### Test-control relationship
 
-Robot Framework should treat the Pi 3B applications as externally controlled SUT interfaces rather than directly importing their internal Python modules. The test suite should:
+Robot Framework should treat the Pi 3B applications as externally controlled test interfaces rather than directly importing their internal Python modules. The test suite should:
 
 1. Command the Pi 1/Arduino Nano to apply a defined stimulus.
-2. Use the operational GUI or Configurator interface on the Pi 3B to configure or observe the SUT.
+2. Use the GUI test interface or Configurator test interface to configure or observe the CSN.
 3. Read the resulting measurement, state, error, and control values through the Pi 3B CAN path.
 4. Compare the observed result with the expected value and store the test evidence on the Pi 1.
 
-The Pi 1 and Pi 3B should use a defined network protocol or SSH-based command interface. The test suite must identify which Pi owns each operation so that test execution, SUT interaction, CAN communication, and stimulus generation do not become implicit dependencies.
+The Pi 1 and Pi 3B should use a defined network protocol or SSH-based command interface. The test suite must identify which Pi owns each operation so that test execution, GUI interaction, CAN access, and stimulus generation do not become implicit dependencies.
 
 ### Stimulus channels
 
@@ -182,9 +165,9 @@ The Pi 1 and Pi 3B should use a defined network protocol or SSH-based command in
 
 ## 2.2 Development and HIL Deployment Diagram
 
-This deployment view combines the Windows development environment with the HIL installation. The Windows laptop is the primary development workstation. SSH is used to operate Raspberry Pi 1 test infrastructure and the Raspberry Pi 3B SUT without requiring the Windows laptop to have CAN or STM32 USB drivers.
+This deployment view combines the Windows development environment with the HIL installation. The Windows laptop is the primary development workstation. SSH is used to operate the Raspberry Pi 1 test controller and the Raspberry Pi 3B Linux station without requiring the Windows laptop to have CAN or STM32 USB drivers.
 
-Raspberry Pi 1 hosts the ARM STM32 buildchain, Robot Framework test controller, and ST-LINK test equipment. Raspberry Pi 3B is part of the SUT and hosts the operational Linux Python applications and CAN adapter. The Pi 3B receives its application source/configuration and the CSN firmware artifact through the defined deployment workflow; it must not compile source code.
+The Raspberry Pi 3B (`pcberry.local`) hosts the Linux Python applications and the CAN adapter. The Raspberry Pi 1 (`testberry.local`) hosts Robot Framework, the Arduino stimulus control, the ARM STM32 buildchain, and the STM32 debugger. The ST-LINK debugger is physically attached to `testberry.local` and provides the programming and debugging connection to the real CSN.
 
 ```mermaid
 flowchart LR
@@ -200,28 +183,23 @@ flowchart LR
 
   REPO[Git repository\nsource and test artifacts]
 
-  subgraph PI1[Raspberry Pi 1 - build and HIL test controller]
+  subgraph PI1[Raspberry Pi 1 - testberry.local - HIL test controller]
     RF[Robot Framework]
     SU[HIL test suite]
     RFLIB[Test libraries]
     BUILD[STM32 buildchain\nARM GCC + linker + scripts]
-    ARTIFACT[Firmware artifact\nchecksum and build metadata]
-    DEBUG[ST-LINK debugger\nflashing and SWD]
+    DEBUG[STM32 debugger\nST-LINK tools]
     RF --> SU
     SU --> RFLIB
-    BUILD --> ARTIFACT
+    BUILD --> DEBUG
   end
 
-  subgraph PI3[Raspberry Pi 3B - SUT component]
-    RUNTIME[Pi 3B runtime\nOS, apps, configuration]
-    GUI[Process Control GUI\noperational software]
-    CFG[Node Configurator\noperational software]
+  subgraph PI3[Raspberry Pi 3B - pcberry.local - Linux test station]
+    GUI[Process Control GUI\ntest interface]
+    CFG[Node Configurator\ntest interface]
     CAN[CAN adapter\nSocketCAN can0]
     GUI --> CAN
     CFG --> CAN
-    RUNTIME --- GUI
-    RUNTIME --- CFG
-    RUNTIME --- CAN
   end
 
   subgraph STIM[Arduino Nano HIL stimulator]
@@ -230,7 +208,7 @@ flowchart LR
     NANO --> CONDITION
   end
 
-  subgraph SUT[System under test: CSN and runtime interfaces]
+  subgraph DUT[Real device under test]
     CSN[CSN STM32]
     INPUTS[Resistance, voltage,\nand pulse inputs]
     CSNCAN[CAN interface]
@@ -240,7 +218,7 @@ flowchart LR
 
   DEV <--> |Git / file synchronization| REPO
   REPO <--> |pull source, push results| PI1
-  REPO <--> |deploy SUT application and configuration| PI3
+  REPO <--> |pull source, publish artifacts| PI3
   DEV -.-> |SSH| PI1
   DEV -.-> |SSH| PI3
   RFLIB --> |USB serial or network command| NANO
@@ -256,21 +234,20 @@ flowchart LR
 | Deployment node | Deployed components | Main responsibility |
 | --- | --- | --- |
 | Windows laptop | VS Code, Python source, STM32 source, local tests | Daily implementation, review, documentation, and fast software-only validation without administrator rights. |
-| Raspberry Pi 1 | ARM GCC toolchain, build scripts, Robot Framework, HIL tests, test libraries, ST-LINK tools | Firmware compilation, artifact metadata/checksums, test sequencing, assertions, result storage, Arduino Nano control, and CSN flashing/debugging. It does not host the SUT application or access its runtime CAN interface. |
-| Raspberry Pi 3B | SUT operating system, GUI, Configurator, Python runtime, `python-can`, SocketCAN, and CAN adapter | Operational SUT behavior, physical CAN communication, application/configuration behavior, and interaction with the CSN. It does not compile source code or host test-control tools. |
+| Raspberry Pi 1 (`testberry.local`) | Robot Framework, HIL tests, test libraries, ARM GCC buildchain, STM32 debugger tools | Test sequencing, assertions, result storage, Arduino Nano control, firmware compilation, flashing, and debugging. |
+| Raspberry Pi 3B (`pcberry.local`) | GUI, Configurator, `python-can`, SocketCAN, CAN adapter | Operator/test interfaces and CAN communication with the real CSN. |
 | Arduino Nano | Relay GPIO control, PWM generator, pulse generator | Electrical stimulation of the real CSN through the protection and conditioning circuits. |
-| Real CSN | STM32 firmware, CAN, sensor inputs | SUT component. Receives HIL stimuli, executes firmware, and reports measurements/status over CAN. |
+| Real CSN | STM32 firmware, CAN, sensor inputs | Device under test. Receives HIL stimuli, executes firmware, and reports measurements/status over CAN. |
 
 ### Connections
 
-- **Windows to Pi 1:** SSH for starting builds and Robot Framework, retrieving test results, and maintenance.
-- **Windows to Pi 3B:** SSH for deploying the SUT application/configuration and retrieving SUT observations. Flashing and debugging are performed from Pi 1 test infrastructure.
-- **Repository to both Pis:** Git-based source and test synchronization. Pi 1 publishes traceable firmware artifacts; generated logs and artifacts should be identified and retained separately from source files.
-- **Pi 1 to CSN:** Pi 1 verifies and flashes the selected firmware artifact using ST-LINK. The firmware artifact remains associated with the test evidence and source revision.
+- **Windows to `testberry.local`:** SSH for starting Robot Framework, invoking firmware builds, flashing, debugging, retrieving firmware artifacts, and maintenance.
+- **Windows to `pcberry.local`:** SSH for starting the GUI/Configurator, retrieving test observations, and maintaining the CAN station.
+- **Repository to both Pis:** Git-based source and test synchronization. Generated logs and firmware artifacts should be identified and retained separately from source files.
 - **Pi 1 to Arduino Nano:** USB serial is preferred for explicit stimulus commands; a network command service may be used if the Nano is physically remote from Pi 1.
-- **Pi 1 to Pi 3B:** Test-library calls over the network or SSH control the SUT applications and retrieve observations.
-- **Pi 3B to CSN:** The SUT CAN adapter exposes `can0` through SocketCAN for the GUI and Configurator.
-- **Pi 1 to CSN debugger:** ST-LINK uses SWD for flashing and source-level debugging. SWD is test infrastructure and is separate from the SUT CAN communication path.
+- **Pi 1 to Pi 3B:** Test-library calls over the network or SSH control the GUI and Configurator test interfaces and retrieve observations.
+- **Pi 3B to CSN:** The CAN adapter exposes `can0` through SocketCAN for GUI, Configurator, and test-interface operations.
+- **Pi 1 to CSN debugger:** ST-LINK uses SWD for flashing and source-level debugging. SWD is a separate connection from CAN and must not be treated as the runtime communication path.
 - **Arduino Nano to CSN:** The relay, RC, and pulse-conditioning circuits provide the resistance, 0 V to 5 V analog, and pulse stimuli. The Nano must not be connected directly to unprotected CSN inputs.
 
 ## 3. Windows Python Development
@@ -345,7 +322,7 @@ Normally dependent on administrator-installed drivers or a managed station:
 
 ## 4. Linux and Raspberry Pi Infrastructure
 
-Use Debian, Ubuntu, or Raspberry Pi OS. Raspberry Pi 1 should have the build and test-controller tools:
+Use Debian, Ubuntu, or Raspberry Pi OS. The Linux station should have:
 
 - Python 3 and `venv`
 - `python-can`
@@ -355,15 +332,6 @@ Use Debian, Ubuntu, or Raspberry Pi OS. Raspberry Pi 1 should have the build and
 - Git
 - Optional CMake or Make
 - Optional pytest and coverage tools
-
-Raspberry Pi 3B should have only the SUT runtime tools:
-
-- Python runtime and application dependencies
-- `python-can` and `can-utils`
-- CAN adapter and SocketCAN configuration
-- Artifact verification tools
-
-The ARM buildchain, firmware compiler, and ST-LINK tools must not be installed on Pi 3B.
 
 The physical CAN interface should be configured outside the Python application. A typical Linux setup is conceptually:
 
@@ -404,9 +372,9 @@ The Windows laptop is suitable for:
 
 The firmware source does not need to execute on Windows.
 
-### 5.2 Build on Raspberry Pi 1
+### 5.2 Build on Linux
 
-Raspberry Pi 1 should provide an ARM embedded toolchain, normally `arm-none-eabi-gcc`, together with the project linker script, startup code, STM32 HAL sources, and build configuration. Pi 1 builds the exact committed revision and publishes an artifact; Pi 3B must not compile source code.
+The Linux test station should provide an ARM embedded toolchain, normally `arm-none-eabi-gcc`, together with the project linker script, startup code, STM32 HAL sources, and build configuration.
 
 The build should produce at least:
 
@@ -419,15 +387,15 @@ SensorNode firmware artifacts:
 
 The build must be scripted so the same command can be run manually, remotely, and later by CI. The existing System Workbench project can be used initially if it remains the only known-good build, but a command-line build should be introduced as soon as practical.
 
-The artifact should include the source revision, compiler version, build options, and checksum. Conceptual workflow:
+Conceptual workflow:
 
 ```text
-Windows edit -> Git push/commit -> Pi 1 checkout -> build -> artifact and checksum -> Pi 3B
+Windows edit -> Git push/commit -> Linux checkout -> build -> artifact
 ```
 
-### 5.3 Flash and debug from Raspberry Pi 1
+### 5.3 Flash and debug on Linux
 
-Connect the STM32 board and ST-LINK programmer to Raspberry Pi 1. Pi 1 receives the traceable build artifact, verifies it, and owns:
+Connect the STM32 board and ST-LINK programmer to the Linux test station. The station owns:
 
 - ST-LINK USB access and drivers
 - Firmware flashing
@@ -437,7 +405,7 @@ Connect the STM32 board and ST-LINK programmer to Raspberry Pi 1. Pi 1 receives 
 - CAN hardware connection
 - Sensor and actor verification
 
-The Windows laptop can control both Pis through SSH or remote desktop. Pi 3B remains the runtime SUT; Pi 1 provides the physical programming and debugging connection used by test infrastructure.
+The Windows laptop can control the station through SSH or remote desktop, but physical USB access remains on the station.
 
 ### 5.4 Firmware test layers
 
@@ -507,10 +475,9 @@ sequenceDiagram
     Developer->>Win: Run unit and virtual-CAN tests
     Developer->>Git: Commit and push changes
     Git-->>Linux: Checkout or pull source
-    Git-->>Linux: Pi 1 checks out source
-    Linux->>Linux: Pi 1 builds and records artifact metadata
-    Linux->>FW: Pi 1 verifies and flashes artifact
-    Linux->>FW: Pi 1 coordinates tests against Pi 3B and the CSN SUT
+    Linux->>Linux: Build Python package and STM32 firmware
+    Linux->>FW: Flash firmware artifact
+    Linux->>FW: Run CAN hardware-in-the-loop tests
     Linux-->>Developer: Report test results and artifacts
     Developer->>Git: Tag approved release
     Git-->>Pi: Deploy source/package and configuration
@@ -527,8 +494,8 @@ sequenceDiagram
 | Virtual CAN tests | Primary | Yes | Optional |
 | SocketCAN tests | No | Primary | Yes |
 | Physical CAN | Only if drivers already exist | Primary | Yes |
-| STM32 compilation | No | Pi 1 primary | Usually no |
-| STM32 flashing/debugging | Usually no | Pi 1 primary | No |
+| STM32 compilation | Optional if toolchain is portable | Primary | Usually no |
+| STM32 flashing/debugging | Usually no | Primary | No |
 | GUI validation | Primary | Yes | Yes |
 | Release packaging | Optional | Primary | No |
 | Field operation | No | Optional | Primary |
@@ -543,23 +510,17 @@ The current code contains Linux-specific setup and direct CAN construction in th
 4. Remove `sudo`, `ip`, and `ifconfig` calls from application startup.
 5. Add a simulated SensorNode for Windows protocol tests.
 6. Add protocol tests for setup frames, runtime frames, signed values, and byte order.
-7. Add a scripted firmware build on Pi 1.
-8. Transfer immutable firmware artifacts with build metadata and checksums from Pi 1 to Pi 3B.
-9. Keep flashing and debugging as explicit Pi 1 test-infrastructure operations; treat Pi 3B as part of the SUT.
-10. Add separate development, build, test, and production configuration files.
-11. Document the exact Pi 1 build/ST-LINK service and Pi 3B SUT runtime/CAN setup for the station administrator.
+7. Add a scripted firmware build on the Linux station.
+8. Keep flashing as an explicit hardware-station operation.
+9. Add separate development, test, and production configuration files.
+10. Document the exact Linux/Pi service and CAN setup for the station administrator.
 
 These changes preserve the existing CAN integration boundary while making the application portable across Windows development, Linux desktop deployment, and Raspberry Pi deployment.
 
 ## 10. Infrastructure Decision
 
-Adopt **Windows-first development with separated existing Raspberry Pi roles**:
-
-- Raspberry Pi 1 is the build and HIL test-controller station.
-- Raspberry Pi 3B is part of the SUT and runs the operational GUI/Configurator and physical CAN runtime.
-- Raspberry Pi 1 is the build and test-infrastructure station for Robot Framework, ST-LINK flashing, and debugging.
-- The CSN and its runtime interfaces form the SUT for integration and system tests.
+Adopt **Windows-first development with a managed Linux/Raspberry Pi hardware station**.
 
 This is the best fit for the constraints because it keeps the bulk of development local and administrator-independent, while reserving Linux for the capabilities that cannot be reproduced faithfully on the Windows laptop: SocketCAN, physical CAN, STM32 flashing, and hardware debugging.
 
-The Pi 1 build station should produce traceable artifacts rather than sharing a live source/build environment with the SUT. Pi 3B should receive the required application and firmware artifacts as part of SUT deployment and must not compile source code. The virtual CAN backend and simulated SensorNode provide the fast feedback loop; hardware-in-the-loop testing provides final SUT confidence.
+The Linux station should be treated as a required validation environment, not as a prerequisite for every source edit. The virtual CAN backend and simulated SensorNode provide the fast feedback loop; hardware-in-the-loop testing provides final confidence.
