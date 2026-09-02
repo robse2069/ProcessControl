@@ -19,4 +19,4 @@ class SmokeTestLibrary:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
 
-        return result.returncode == 0
+        return True if result.returncode == 0 else False
