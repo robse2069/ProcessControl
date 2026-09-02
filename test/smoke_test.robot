@@ -5,3 +5,7 @@ Library    SmokeTestLibrary.py
 Process Control Test Framework Is Available
     ${framework_is_available}=    Framework Is Available
     Should Be True    ${framework_is_available}
+
+Process Control Test Framework Is Available 2
+    ${pcberry}=    pcberry is available
+    Should Be True    ${pcberry}
