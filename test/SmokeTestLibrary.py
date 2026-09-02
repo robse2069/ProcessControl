@@ -16,6 +16,7 @@ class SmokeTestLibrary:
                 timeout=10,
                 check=False,
             )
+            print(f"Ping result: {result.returncode}")
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
 
