@@ -10,7 +10,7 @@ class SmokeTestLibrary:
     def pcberry_is_available(self):
         try:
             result = subprocess.run(
-                ["ping", "-c", "1", "pcberry.local"],
+                ["ping", "-c", "1", "192.168.0.20"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 timeout=10,
