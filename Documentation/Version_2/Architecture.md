@@ -77,7 +77,7 @@ Responsibilities:
 - Provide node configuration and control operations.
 - Own logging and log-file lifecycle.
 - Expose current values, state, errors, and operation results through REST.
-- Serialize or coordinate conflicting operations from multiple clients.
+- Reject additional requests while another REST request is active; concurrent REST access is not supported.
 - Validate requests before sending CAN frames.
 - Return explicit success, failure, timeout, and communication-error responses.
 
@@ -109,7 +109,9 @@ The initial resource groups should include:
 | Logging | `POST /api/v1/logging/stop` | Stop logging. |
 | Logging | `GET /api/v1/logging/status` | Read logging state and active file information. |
 
-The exact request and response schemas are a subsequent design task. The API should use JSON, explicit status/error information, timeouts, and versioning under `/api/v1`.
+The API uses JSON, explicit status/error information, synchronous request handling, timeouts, and versioning under `/api/v1`. The complete contract is maintained in [API_contract_description.md](../API/v1/API_contract_description.md).
+
+The contract defines the health response, runtime values, control, configuration, and logging endpoints. Health includes GUI, Backend, Configurator, and connected CSN versions, plus a configurable recent-error list whose default size is 10. Logging accepts a caller-customizable filename subject to Backend path-safety rules. REST access is synchronous and limited to one active request at a time.
 
 ## 4. Component and Deployment View
 
@@ -289,7 +291,7 @@ sequenceDiagram
 - The Backend is the only application component that owns the CAN connection on `pcberry.local`.
 - GUI and automated tests must not access Backend memory, files, or internal Python modules directly.
 - REST calls must include timeouts and distinguish validation, communication, timeout, and server errors.
-- The Backend must serialize operations that could conflict, such as simultaneous setup sessions, configuration writes, logging transitions, or control commands.
+- Only one REST request is supported at a time; REST requests are synchronous and are not processed concurrently.
 - GUI and test clients must tolerate the Backend being unavailable and must expose actionable error information.
 - API versioning must be used from the first implementation.
 - The Backend API must not expose CAN frame construction as its primary public abstraction; clients should use semantic operations such as `control`, `configuration`, and `values`.
@@ -311,7 +313,7 @@ The following decisions are intentionally left open for the next architecture it
 
 - REST framework and server implementation.
 - Backend internal module and class structure.
-- Synchronous versus asynchronous REST request handling.
+- Internal Backend scheduling outside the synchronous REST contract.
 - CAN receive scheduling and buffering strategy.
 - Runtime data persistence and retention.
 - Log file format, rotation, and storage location.
