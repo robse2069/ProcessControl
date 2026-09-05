@@ -86,7 +86,7 @@ flowchart LR
     GUI --> LOG
 ```
 
-Both Python applications open CAN independently. The GUI's `config.xml` currently says `loopback`, but the main program explicitly constructs `PC_Comms` with `type="CAN"`.
+Both Python applications open CAN independently. The GUI's `config.xml` currently says `simulated_node`, but the main program explicitly constructs `PC_Comms` with `type="CAN"`.
 
 ## 4. GUI Class Diagram
 

@@ -139,8 +139,8 @@ class configManager:
 
         # misc options
         self.commsMethod=root.findall('communication')[0].attrib['method']
-        if self.commsMethod=="loopback":
-            logging.info("Communication disabled, Loopback only")
+        if self.commsMethod=="simulated_node":
+            logging.info("Communication disabled, simulated node only")
         self.GUIUpdate=root.findall('GUIUpdate')[0].text
 
         #logging options
