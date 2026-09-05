@@ -40,8 +40,4 @@ def test_rest_api_reads_ambient_temperature_value():
 
     assert response["node_id"] == CSN_ID
     assert 20 <= response["value"] <= 40
-
-    time.sleep(20)
-    assert response["node_id"] == CSN_ID
-    assert 20 <= response["value"] <= 40
     

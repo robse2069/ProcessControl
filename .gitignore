@@ -1,3 +1,4 @@
 ./GUI/__pycache__
+__pycache__/
 .venv/
 test/results/
