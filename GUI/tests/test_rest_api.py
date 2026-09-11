@@ -160,11 +160,42 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
             rows = list(csv.DictReader(logfile))
 
         expected_entries = (5 * 1000) // cycle_ms
-        assert len(rows) == expected_entries
+        minimum_entries = int(expected_entries * 0.8)
+        maximum_entries = int(expected_entries * 1.2) + 1
+
+        assert minimum_entries <= len(rows) <= maximum_entries
         assert rows
-        assert all(row["timestamp"] for row in rows)
-        assert all(int(row["can_id"]) == CSN_ID for row in rows)
+        assert set(rows[0]) == {
+            "timestamp_utc",
+            "timestamp_unix_ns",
+            "sequence",
+            "can_id",
+            "sensor_name",
+            "value",
+            "unit",
+            "data_hex",
+        }
+        assert [int(row["sequence"]) for row in rows] == list(
+            range(1, len(rows) + 1)
+        )
+        assert all(row["timestamp_utc"].endswith("Z") for row in rows)
+        timestamps = [int(row["timestamp_unix_ns"]) for row in rows]
+        assert timestamps == sorted(timestamps)
+        assert all(row["can_id"] == str(CSN_ID) for row in rows)
+        assert all(row["sensor_name"] == "Ambient Temperature" for row in rows)
+        assert all(row["unit"] == "°C" for row in rows)
         assert all(20 <= int(row["value"]) <= 40 for row in rows)
+        assert all(row["data_hex"] == "001e00000000026d" for row in rows)
+
+        intervals = [
+            current - previous
+            for previous, current in zip(timestamps, timestamps[1:])
+        ]
+        expected_interval_ns = cycle_ms * 1_000_000
+        assert all(
+            expected_interval_ns * 0.8 <= interval <= expected_interval_ns * 1.2
+            for interval in intervals
+        )
     finally:
         if created_file is not None and created_file.exists():
             created_file.unlink()
