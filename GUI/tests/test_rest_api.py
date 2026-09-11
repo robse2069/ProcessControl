@@ -35,13 +35,21 @@ def test_rest_api_reads_main_process_configuration():
     assert response["gui_update_ms"] == 500
     assert response["logging_cycle_ms"] == 100
 
-@pytest.mark.hardware
-def test_rest_api_reads_main_process_configuration():
+@pytest.mark.integration_tests
+def test_rest_api_reads_main_process_configuration_real_can():
     response = get_json("/configuration")
 
     assert response["communication_method"] == "can"
     assert response["gui_update_ms"] == 500
     assert response["logging_cycle_ms"] == 100
+
+
+@pytest.mark.integration_tests
+def test_rest_api_reads_ambient_temperature_from_real_can():
+    response = get_json(f"/nodes/{CSN_ID}/values")
+
+    assert response["node_id"] == CSN_ID
+    assert 20 <= response["value"] <= 40
 
 
 def test_rest_api_reads_ambient_temperature_value():
