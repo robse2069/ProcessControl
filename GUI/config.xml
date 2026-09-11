@@ -52,7 +52,7 @@
             unit="°C"
             MsgID="5">
     </measurement>
-        <communication method="simulated_node"
+        <communication method="can"
         ></communication>
     <GUIUpdate name="Updaterate" unit="ms">
         500

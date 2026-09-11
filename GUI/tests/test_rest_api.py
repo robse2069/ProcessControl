@@ -3,6 +3,7 @@ import os
 import time
 from urllib import response
 from urllib.request import urlopen
+import pytest
 
 REST_API_URL = os.environ.get(
     "PROCESS_CONTROL_REST_URL",
@@ -27,6 +28,14 @@ def test_rest_api_reads_configuration():
     assert response["value_max"] == 100
 
 
+def test_rest_api_reads_main_process_configuration():
+    response = get_json("/configuration")
+
+    assert response["communication_method"] == "simulated_node"
+    assert response["gui_update_ms"] == 500
+    assert response["logging_cycle_ms"] == 100
+
+@pytest.mark.hardware
 def test_rest_api_reads_main_process_configuration():
     response = get_json("/configuration")
 
