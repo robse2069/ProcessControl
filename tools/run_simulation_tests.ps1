@@ -81,7 +81,7 @@ try {
         -FilePath $pythonPath `
         -ArgumentList @("main.py", "--config", $config10MsPath, "--host", "127.0.0.1", "--port", $port10Ms) `
         -WorkingDirectory $guiPath `
-        -PassThru
+        -PassThrutest_rest_api_logging_csv_content
 
     Wait-ForBackend -Process $backendProcess -Port $port
     Wait-ForBackend -Process $backend10MsProcess -Port $port10Ms

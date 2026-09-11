@@ -88,6 +88,7 @@ def test_rest_api_reads_ambient_temperature_value():
 @pytest.mark.simulation_tests
 def test_rest_api_logging_start_endpoint_exists():
     filename = "logging-start-endpoint.csv"
+    created_file = None
     try:
         status, response = post_json(
             "/logging/start",
@@ -95,10 +96,13 @@ def test_rest_api_logging_start_endpoint_exists():
             SIMULATED_REST_API_URL,
         )
         assert status == 201
+        created_file = Path(response["filename"])
         assert response["state"] == "active"
         assert response["filename"].endswith(".csv")
     finally:
         stop_logging(SIMULATED_REST_API_URL)
+        if created_file is not None and created_file.exists():
+            created_file.unlink()
 
 
 @pytest.mark.simulation_tests
@@ -136,6 +140,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
     if rest_url is None:
         pytest.skip("PROCESS_CONTROL_SIMULATED_REST_URL_10MS is not configured")
 
+    runtime_seconds = 5
     filename = f"logging-content-{cycle_ms}ms.csv"
     created_file = None
     try:
@@ -150,7 +155,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
             start_response = json.load(response)
 
         created_file = Path(start_response["filename"])
-        time.sleep(5)
+        time.sleep(runtime_seconds)
 
         stop_request = Request(rest_url + "/logging/stop", method="POST")
         with urlopen(stop_request, timeout=2) as response:
@@ -159,7 +164,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
         with created_file.open(newline="", encoding="utf-8") as logfile:
             rows = list(csv.DictReader(logfile))
 
-        expected_entries = (5 * 1000) // cycle_ms
+        expected_entries = (runtime_seconds * 1000) // cycle_ms
         minimum_entries = int(expected_entries * 0.8)
         maximum_entries = int(expected_entries * 1.2) + 1
 
@@ -204,4 +209,3 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
     finally:
         if created_file is not None and created_file.exists():
             created_file.unlink()
-    
