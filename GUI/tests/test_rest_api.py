@@ -1,12 +1,17 @@
 import json
 import os
+import csv
+from pathlib import Path
 import time
-from urllib import response
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 import pytest
 
 REST_API_URL = os.environ.get(
     "PROCESS_CONTROL_REST_URL",
+    "http://127.0.0.1:8000/api/v1",
+)
+SIMULATED_REST_API_URL = os.environ.get(
+    "PROCESS_CONTROL_SIMULATED_REST_URL",
     "http://127.0.0.1:8000/api/v1",
 )
 CSN_ID = 5
@@ -18,6 +23,25 @@ def get_json(path):
         return json.load(response)
 
 
+def post_json(path, payload, rest_url=REST_API_URL):
+    request = Request(
+        rest_url + path,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urlopen(request, timeout=2) as response:
+        return response.status, json.load(response)
+
+
+def stop_logging(rest_url=REST_API_URL):
+    request = Request(rest_url + "/logging/stop", method="POST")
+    with urlopen(request, timeout=2) as response:
+        assert response.status == 200
+        return json.load(response)
+
+
+@pytest.mark.simulation_tests
 def test_rest_api_reads_configuration():
     response = get_json(f"/nodes/{CSN_ID}/configuration")
 
@@ -28,6 +52,7 @@ def test_rest_api_reads_configuration():
     assert response["value_max"] == 100
 
 
+@pytest.mark.simulation_tests
 def test_rest_api_reads_main_process_configuration():
     response = get_json("/configuration")
 
@@ -52,9 +77,95 @@ def test_rest_api_reads_ambient_temperature_from_real_can():
     assert 20 <= response["value"] <= 40
 
 
+@pytest.mark.simulation_tests
 def test_rest_api_reads_ambient_temperature_value():
     response = get_json(f"/nodes/{CSN_ID}/values")
 
     assert response["node_id"] == CSN_ID
     assert 20 <= response["value"] <= 40
+
+
+@pytest.mark.simulation_tests
+def test_rest_api_logging_start_endpoint_exists():
+    filename = "logging-start-endpoint.csv"
+    try:
+        status, response = post_json(
+            "/logging/start",
+            {"filename": filename},
+            SIMULATED_REST_API_URL,
+        )
+        assert status == 201
+        assert response["state"] == "active"
+        assert response["filename"].endswith(".csv")
+    finally:
+        stop_logging(SIMULATED_REST_API_URL)
+
+
+@pytest.mark.simulation_tests
+def test_rest_api_logging_creates_csv_file():
+    filename = "logging-file-exists.csv"
+    created_file = None
+    try:
+        status, response = post_json(
+            "/logging/start",
+            {"filename": filename},
+            SIMULATED_REST_API_URL,
+        )
+        assert status == 201
+        created_file = Path(response["filename"])
+        time.sleep(5)
+        stop_response = stop_logging(SIMULATED_REST_API_URL)
+
+        assert stop_response["state"] == "inactive"
+        assert created_file.suffix == ".csv"
+        assert created_file.exists()
+    finally:
+        if created_file is not None and created_file.exists():
+            created_file.unlink()
+
+
+@pytest.mark.simulation_tests
+@pytest.mark.parametrize(
+    ("cycle_ms", "rest_url"),
+    [
+        (100, SIMULATED_REST_API_URL),
+        (10, os.environ.get("PROCESS_CONTROL_SIMULATED_REST_URL_10MS")),
+    ],
+)
+def test_rest_api_logging_csv_content(cycle_ms, rest_url):
+    if rest_url is None:
+        pytest.skip("PROCESS_CONTROL_SIMULATED_REST_URL_10MS is not configured")
+
+    filename = f"logging-content-{cycle_ms}ms.csv"
+    created_file = None
+    try:
+        request = Request(
+            rest_url + "/logging/start",
+            data=json.dumps({"filename": filename}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(request, timeout=2) as response:
+            assert response.status == 201
+            start_response = json.load(response)
+
+        created_file = Path(start_response["filename"])
+        time.sleep(5)
+
+        stop_request = Request(rest_url + "/logging/stop", method="POST")
+        with urlopen(stop_request, timeout=2) as response:
+            assert response.status == 200
+
+        with created_file.open(newline="", encoding="utf-8") as logfile:
+            rows = list(csv.DictReader(logfile))
+
+        expected_entries = (5 * 1000) // cycle_ms
+        assert len(rows) == expected_entries
+        assert rows
+        assert all(row["timestamp"] for row in rows)
+        assert all(int(row["can_id"]) == CSN_ID for row in rows)
+        assert all(20 <= int(row["value"]) <= 40 for row in rows)
+    finally:
+        if created_file is not None and created_file.exists():
+            created_file.unlink()
     
