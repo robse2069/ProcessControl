@@ -39,7 +39,7 @@ def test_rest_api_reads_main_process_configuration():
 def test_rest_api_reads_main_process_configuration():
     response = get_json("/configuration")
 
-    assert response["communication_method"] == "simulated_node"
+    assert response["communication_method"] == "can"
     assert response["gui_update_ms"] == 500
     assert response["logging_cycle_ms"] == 100
 

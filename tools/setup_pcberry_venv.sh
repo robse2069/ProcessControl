@@ -23,7 +23,7 @@ if [[ ! -x "${PYTHON}" ]]; then
 fi
 
 "${PYTHON}" -m pip install --upgrade pip
-"${PYTHON}" -m pip install --upgrade python-can
+"${PYTHON}" -m pip install --upgrade python-can pytest
 
 "${PYTHON}" - <<'PY'
 import can
