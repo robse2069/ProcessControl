@@ -101,6 +101,16 @@ class RestService:
                     self.send_json(404, {"error": "node not found"})
 
             def do_POST(self):
+                if self.path == "/api/v1/logging/start":
+                    try:
+                        length = int(self.headers.get("Content-Length", "0"))
+                        payload = json.loads(self.rfile.read(length))
+                        service.logger.start(payload["filename"])
+                        self.send_json(201, service.logging_status())
+                    except (KeyError, TypeError, ValueError, RuntimeError) as error:
+                        self.send_json(400, {"error": str(error)})
+                    return
+
                 if self.path == "/api/v1/logging/stop":
                     if service.logger is not None:
                         service.logger.stop()
@@ -129,5 +139,5 @@ class RestService:
         return {
             "state": "active" if self.logger.active else "inactive",
             "filename": self.logger.filename,
-            "records_written": len(self.logger.records),
+            "records_written": self.logger.records_written,
         }

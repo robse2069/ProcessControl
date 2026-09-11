@@ -6,8 +6,9 @@ import threading
 
 from bus_communication import BusCommunication
 from configuration import ConfigurationLoader
+from logger import Logger
 from rest_service import RestService
-from scheduler import Logger, Scheduler
+from scheduler import Scheduler
 
 
 def create_application(config_file, host="127.0.0.1", port=8000,

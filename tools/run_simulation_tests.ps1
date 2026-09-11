@@ -62,9 +62,15 @@ function Wait-ForBackend {
 }
 
 try {
-    $configContent = Get-Content -LiteralPath $configPath -Raw
+    $configContent = [System.Text.Encoding]::UTF8.GetString(
+        [System.IO.File]::ReadAllBytes($configPath)
+    )
     $configContent = $configContent -replace '(<logging\s+name="cycletime"\s+value=")100("\s+unit="ms")', '${1}10$2'
-    Set-Content -LiteralPath $config10MsPath -Value $configContent -Encoding UTF8
+    [System.IO.File]::WriteAllText(
+        $config10MsPath,
+        $configContent,
+        (New-Object System.Text.UTF8Encoding($false))
+    )
 
     $backendProcess = Start-Process `
         -FilePath $pythonPath `

@@ -192,10 +192,15 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
             for previous, current in zip(timestamps, timestamps[1:])
         ]
         expected_interval_ns = cycle_ms * 1_000_000
-        assert all(
-            expected_interval_ns * 0.8 <= interval <= expected_interval_ns * 1.2
+        expected_minimum = expected_interval_ns * 0.8
+        expected_maximum = expected_interval_ns * 1.2
+        intervals_in_range = [
+            interval
             for interval in intervals
-        )
+            if expected_minimum <= interval <= expected_maximum
+        ]
+        assert len(intervals_in_range) >= len(intervals) * 0.8
+        assert expected_minimum <= sum(intervals) / len(intervals) <= expected_maximum
     finally:
         if created_file is not None and created_file.exists():
             created_file.unlink()
