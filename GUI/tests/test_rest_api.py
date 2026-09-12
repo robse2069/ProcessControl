@@ -209,3 +209,76 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
     finally:
         if created_file is not None and created_file.exists():
             created_file.unlink()
+
+
+@pytest.mark.integration_tests
+def test_rest_api_logging_csv_content_real_can():
+    runtime_seconds = 5
+    cycle_ms = 100
+    filename = "logging-content-real-can.csv"
+    created_file = None
+    try:
+        status, response = post_json(
+            "/logging/start",
+            {"filename": filename},
+            REST_API_URL,
+        )
+        assert status == 201
+        created_file = Path(response["filename"])
+
+        time.sleep(runtime_seconds)
+        stop_response = stop_logging(REST_API_URL)
+        assert stop_response["state"] == "inactive"
+
+        with created_file.open(newline="", encoding="utf-8") as logfile:
+            rows = list(csv.DictReader(logfile))
+
+        expected_entries = (runtime_seconds * 1000) // cycle_ms
+        minimum_entries = int(expected_entries * 0.8)
+        maximum_entries = int(expected_entries * 1.2) + 1
+
+        assert minimum_entries <= len(rows) <= maximum_entries
+        assert rows
+        assert set(rows[0]) == {
+            "timestamp_utc",
+            "timestamp_unix_ns",
+            "sequence",
+            "can_id",
+            "sensor_name",
+            "value",
+            "unit",
+            "data_hex",
+        }
+        assert [int(row["sequence"]) for row in rows] == list(
+            range(1, len(rows) + 1)
+        )
+        assert all(row["timestamp_utc"].endswith("Z") for row in rows)
+        timestamps = [int(row["timestamp_unix_ns"]) for row in rows]
+        assert timestamps == sorted(timestamps)
+        assert all(row["can_id"] == str(CSN_ID) for row in rows)
+        assert all(row["sensor_name"] == "Ambient Temperature" for row in rows)
+        assert all(row["unit"] == "°C" for row in rows)
+        assert all(20 <= int(row["value"]) <= 40 for row in rows)
+        assert all(len(row["data_hex"]) == 16 for row in rows)
+        assert all(
+            bytes.fromhex(row["data_hex"])
+            for row in rows
+        )
+
+        intervals = [
+            current - previous
+            for previous, current in zip(timestamps, timestamps[1:])
+        ]
+        expected_interval_ns = cycle_ms * 1_000_000
+        expected_minimum = expected_interval_ns * 0.8
+        expected_maximum = expected_interval_ns * 1.2
+        intervals_in_range = [
+            interval
+            for interval in intervals
+            if expected_minimum <= interval <= expected_maximum
+        ]
+        assert len(intervals_in_range) >= len(intervals) * 0.8
+        assert expected_minimum <= sum(intervals) / len(intervals) <= expected_maximum
+    finally:
+        if created_file is not None and created_file.exists():
+            created_file.unlink()
