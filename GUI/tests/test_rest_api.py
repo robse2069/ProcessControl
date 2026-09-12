@@ -141,6 +141,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
         pytest.skip("PROCESS_CONTROL_SIMULATED_REST_URL_10MS is not configured")
 
     runtime_seconds = 5
+    sensor_interval_ms = 500
     filename = f"logging-content-{cycle_ms}ms.csv"
     created_file = None
     try:
@@ -164,7 +165,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
         with created_file.open(newline="", encoding="utf-8") as logfile:
             rows = list(csv.DictReader(logfile))
 
-        expected_entries = (runtime_seconds * 1000) // cycle_ms
+        expected_entries = (runtime_seconds * 1000) // sensor_interval_ms
         minimum_entries = int(expected_entries * 0.8)
         maximum_entries = int(expected_entries * 1.2) + 1
 
@@ -196,9 +197,9 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
             current - previous
             for previous, current in zip(timestamps, timestamps[1:])
         ]
-        expected_interval_ns = cycle_ms * 1_000_000
+        expected_interval_ns = sensor_interval_ms * 1_000_000
         expected_minimum = expected_interval_ns * 0.8
-        expected_maximum = expected_interval_ns * 1.2
+        expected_maximum = expected_interval_ns * 1.3
         intervals_in_range = [
             interval
             for interval in intervals

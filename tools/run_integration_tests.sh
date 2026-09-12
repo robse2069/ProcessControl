@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 GUI_DIR="${REPO_ROOT}/GUI"
 PYTHON="${REPO_ROOT}/.venv/bin/python"
 CONFIG="config_real_can.xml"
@@ -12,14 +12,15 @@ REST_URL="http://${HOST}:${PORT}/api/v1"
 BACKEND_PID=""
 
 cleanup() {
-    if [[ -n "${BACKEND_PID}" ]] && kill -0 "${BACKEND_PID}" 2>/dev/null; then
+    if [ -n "${BACKEND_PID}" ] && kill -0 "${BACKEND_PID}" 2>/dev/null; then
         kill "${BACKEND_PID}" 2>/dev/null || true
         wait "${BACKEND_PID}" 2>/dev/null || true
     fi
 }
-trap cleanup EXIT INT TERM
+trap cleanup 0
+trap 'exit 130' INT TERM
 
-if [[ ! -x "${PYTHON}" ]]; then
+if [ ! -x "${PYTHON}" ]; then
     echo "Project virtual environment not found: ${PYTHON}" >&2
     exit 1
 fi
@@ -39,6 +40,11 @@ if ! ip link show can0 | grep -q "state UP"; then
     exit 1
 fi
 
+if "${PYTHON}" -c 'import socket, sys; socket.create_connection((sys.argv[1], int(sys.argv[2])), 0.25).close()' "${HOST}" "${PORT}" >/dev/null 2>&1; then
+    echo "Port ${PORT} is already in use. Stop the old backend before running integration tests." >&2
+    exit 1
+fi
+
 cd "${GUI_DIR}"
 "${PYTHON}" main.py \
     --config "${CONFIG}" \
@@ -48,19 +54,21 @@ cd "${GUI_DIR}"
     > "${REPO_ROOT}/integration_backend.log" 2>&1 &
 BACKEND_PID=$!
 
-for _ in $(seq 1 50); do
+attempt=1
+while [ "${attempt}" -le 50 ]; do
     if ! kill -0 "${BACKEND_PID}" 2>/dev/null; then
         echo "Backend exited before opening port ${PORT}." >&2
         cat "${REPO_ROOT}/integration_backend.log" >&2 || true
         exit 1
     fi
-    if (echo >/dev/tcp/${HOST}/${PORT}) >/dev/null 2>&1; then
+    if "${PYTHON}" -c 'import socket, sys; socket.create_connection((sys.argv[1], int(sys.argv[2])), 0.25).close()' "${HOST}" "${PORT}" >/dev/null 2>&1; then
         break
     fi
     sleep 0.1
+    attempt=$((attempt + 1))
 done
 
-if ! (echo >/dev/tcp/${HOST}/${PORT}) >/dev/null 2>&1; then
+if ! "${PYTHON}" -c 'import socket, sys; socket.create_connection((sys.argv[1], int(sys.argv[2])), 0.25).close()' "${HOST}" "${PORT}" >/dev/null 2>&1; then
     echo "Backend did not open port ${PORT}." >&2
     cat "${REPO_ROOT}/integration_backend.log" >&2 || true
     exit 1

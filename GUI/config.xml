@@ -52,6 +52,13 @@
             unit="°C"
             MsgID="5">
     </measurement>
+       <measurement name="Ambient Pressure"
+            value="0"
+            minValue="0"
+            maxValue="2000"
+            unit="hPa"
+            MsgID="6">
+    </measurement>
         <communication method="simulated_node"
         ></communication>
     <GUIUpdate name="Updaterate" unit="ms">

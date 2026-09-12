@@ -16,10 +16,11 @@ class Scheduler:
         self.stop_event = threading.Event()
 
     def run_once(self):
-        message = self.bus_communication.poll()
+        messages = self.bus_communication.poll_all()
         if self.logger is not None:
-            self.logger.record(message)
-        return message
+            for message in messages:
+                self.logger.record(message)
+        return messages
 
     def run(self):
         next_run = time.monotonic()

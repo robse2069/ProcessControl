@@ -77,6 +77,11 @@ class Logger:
             if measurement is None:
                 return
 
+            value = int.from_bytes(
+                message.data[:2],
+                byteorder="big",
+                signed=True,
+            )
             timestamp_unix_ns = (
                 self._wall_clock_ns
                 + time.perf_counter_ns()
@@ -95,7 +100,7 @@ class Logger:
                 "sequence": self._sequence,
                 "can_id": message.arbitration_id,
                 "sensor_name": measurement.name,
-                "value": measurement.value,
+                "value": value,
                 "unit": measurement.unit,
                 "data_hex": message.data.hex(),
             })

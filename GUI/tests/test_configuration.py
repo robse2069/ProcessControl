@@ -32,9 +32,15 @@ def test_loads_configured_measurements(configuration):
         for measurement in configuration.measurements
     }
 
-    assert set(measurements) == {"Voltage", "Ambient Temperature"}
+    assert set(measurements) == {
+        "Voltage",
+        "Ambient Temperature",
+        "Ambient Pressure",
+    }
     assert measurements["Voltage"].can_id == 42
     assert measurements["Voltage"].unit == "Volt"
+    assert measurements["Ambient Pressure"].can_id == 6
+    assert measurements["Ambient Pressure"].unit == "hPa"
 
 
 def test_loads_ambient_temperature_configuration(configuration):

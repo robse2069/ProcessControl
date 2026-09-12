@@ -40,8 +40,40 @@ class SimulatedNode:
             timestamp=time.time(),
         )
 
+    def receive_all(self):
+        message = self.receive()
+        return [] if message is None else [message]
+
     def close(self):
         return None
+
+
+class SimulatedMultiSensorNode(SimulatedNode):
+    """Produce temperature and pressure frames in one bus interval."""
+
+    def receive_all(self):
+        now = time.monotonic()
+        if now < self.next_send:
+            return []
+        self.next_send = now + self.interval
+        timestamp = time.time()
+        return [
+            BusMessage(
+                arbitration_id=5,
+                data=bytes.fromhex("00 1e 00 00 00 00 02 6d"),
+                timestamp=timestamp,
+            ),
+            BusMessage(
+                arbitration_id=6,
+                data=bytes.fromhex("03 f5 00 00 00 00 02 6d"),
+                timestamp=timestamp,
+            ),
+            BusMessage(
+                arbitration_id=5,
+                data=bytes.fromhex("00 1f 00 00 00 00 02 6d"),
+                timestamp=timestamp,
+            ),
+        ]
 
 
 class RealCanBus:
@@ -60,6 +92,14 @@ class RealCanBus:
             timestamp=message.timestamp,
         )
 
+    def receive_all(self):
+        messages = []
+        while True:
+            message = self.receive()
+            if message is None:
+                return messages
+            messages.append(message)
+
     def close(self):
         self.bus.shutdown()
 
@@ -69,18 +109,22 @@ class BusCommunication:
         self.configuration = configuration
         if configuration.communication_method == "simulated_node":
             self.handler = SimulatedNode()
+        elif configuration.communication_method == "simulated_multisensor":
+            self.handler = SimulatedMultiSensorNode()
         else:
             self.handler = RealCanBus(channel)
 
     def poll(self):
-        message = self.handler.receive()
-        if message is None:
-            return None
+        messages = self.poll_all()
+        return messages[0] if messages else None
 
-        for measurement in self.configuration.measurements:
-            if measurement.can_id == message.arbitration_id:
-                measurement.value = decode_sensor_value(message.data)
-        return message
+    def poll_all(self):
+        messages = self.handler.receive_all()
+        for message in messages:
+            for measurement in self.configuration.measurements:
+                if measurement.can_id == message.arbitration_id:
+                    measurement.value = decode_sensor_value(message.data)
+        return messages
 
     def close(self):
         self.handler.close()
