@@ -215,7 +215,7 @@ def test_rest_api_logging_csv_content(cycle_ms, rest_url):
 @pytest.mark.integration_tests
 def test_rest_api_logging_csv_content_real_can():
     runtime_seconds = 5
-    cycle_ms = 100
+    cycle_ms = 500
     filename = "logging-content-real-can.csv"
     created_file = None
     try:
