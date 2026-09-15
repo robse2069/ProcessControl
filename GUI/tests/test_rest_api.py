@@ -281,5 +281,6 @@ def test_rest_api_logging_csv_content_real_can():
         assert len(intervals_in_range) >= len(intervals) * 0.8
         assert expected_minimum <= sum(intervals) / len(intervals) <= expected_maximum
     finally:
-        if created_file is not None and created_file.exists():
-            created_file.unlink()
+        pass
+        # if created_file is not None and created_file.exists():
+        #     created_file.unlink()
